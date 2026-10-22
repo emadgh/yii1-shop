@@ -2,9 +2,10 @@
 class AppController extends CController
 {
     public $layout='//layouts/main';
+    public $socialImage='';
     public $pageTitle='بازارچه';
     public $metaDescription='فروشگاه اینترنتی بازارچه؛ خرید آسان و محصولات منتخب.';
-    protected function beforeAction($action) { OrderService::expire(); Yii::app()->params['currency']=Money::unit(); return parent::beforeAction($action); }
+    protected function beforeAction($action) { header('X-Content-Type-Options: nosniff');header('X-Frame-Options: SAMEORIGIN');header('Referrer-Policy: strict-origin-when-cross-origin'); OrderService::expire(); Yii::app()->params['currency']=Money::unit(); return parent::beforeAction($action); }
 
     public function render($view,$data=null,$return=false)
     {
@@ -19,7 +20,7 @@ class AppController extends CController
             $storeTheme=$this->layout==='//layouts/admin'?'admin':ThemeService::key();
             $messages='';foreach(array('success','error') as $kind)if(Yii::app()->user->hasFlash($kind))$messages.='<div class="flash flash-'.$kind.'">'.CHtml::encode(Yii::app()->user->getFlash($kind)).'</div>';
             $html=$messages.$html;
-            $html='<div data-pjax-title="'.$title.'" data-pjax-description="'.$description.'" data-store-theme="'.CHtml::encode($storeTheme).'">'.$html.'</div>';
+            $html='<div data-pjax-title="'.$title.'" data-pjax-description="'.$description.'" data-pjax-image="'.CHtml::encode($this->socialImage).'" data-store-theme="'.CHtml::encode($storeTheme).'">'.$html.'</div>';
             if($return) return $html;
             echo $html;
             return;

@@ -10,7 +10,7 @@
 <?php if(Commerce::showPrices()): ?><div class="detail-price"><?= Money::format($p->salePrice()) ?> <?php if($p->discountPercent()): ?><span class="discount-badge"><?= $p->discountPercent() ?>٪ تخفیف</span><?php endif; ?></div>
 <?php if(max((int)$p->compare_price,(int)$p->price)>$p->salePrice()): ?><div class="old-price"><?= Money::format(max($p->compare_price,$p->price)) ?></div><?php endif; ?>
 <?php endif; ?><p class="stock-label"><?= (int)$p->stock>0?'● موجود در انبار ('.(int)$p->stock.' عدد)':'○ ناموجود' ?></p>
-<?php if(Commerce::enabled() && (int)$p->stock>0): ?><?= CHtml::beginForm(array('cart/add'),'post',array('class'=>'buy-row','data-cart-form'=>'add')) ?>
+<?php $variants=$p->variants();if($variants): ?><div class="product-tags" aria-label="انتخاب رنگ و سایز"><?php foreach($variants as $variant): ?><?= CHtml::link(CHtml::encode($variant->variant_label?:$variant->title),$variant->link(),array('class'=>'tag','data-pjax'=>'1','aria-current'=>$variant->id===$p->id?'page':null)) ?><?php endforeach; ?></div><?php endif; ?><?php if(Commerce::enabled() && (int)$p->stock>0 && !(!$p->parent_product_id && $p->variants())): ?><?= CHtml::beginForm(array('cart/add'),'post',array('class'=>'buy-row','data-cart-form'=>'add')) ?>
 <?= CHtml::hiddenField('product_id',$p->id) ?><?= CHtml::numberField('quantity',1,array('min'=>1,'max'=>min(99,(int)$p->stock),'class'=>'qty-field','aria-label'=>'تعداد')) ?><?= CHtml::submitButton('افزودن به سبد خرید',array('class'=>'btn btn-primary')) ?><?= CHtml::endForm() ?><?php endif; ?>
 <div class="product-tags"><?php foreach($p->tags as $tag) echo CHtml::link('#'.CHtml::encode($tag->name),array('shop/index','tag'=>$tag->slug),array('class'=>'tag','data-pjax'=>'1')).' '; ?></div>
 </div></div>
@@ -30,7 +30,7 @@ $structured=array(
  'offers'=>array('@type'=>'Offer','priceCurrency'=>'IRR','price'=>$p->salePrice()*10,
    'availability'=>((int)$p->stock>0?'https://schema.org/InStock':'https://schema.org/OutOfStock')),
 );
-if(!Commerce::showPrices() || !Commerce::enabled())unset($structured['offers']);
+if(!Commerce::showPrices() || !Commerce::enabled() || (!$p->parent_product_id && $variants))unset($structured['offers']);
 if($p->cover()) $structured['image']=Yii::app()->request->hostInfo.$p->cover();
 $props=array();
 foreach($p->specifications as $spec) $props[]=array('@type'=>'PropertyValue','name'=>$spec->name,'value'=>$spec->value);

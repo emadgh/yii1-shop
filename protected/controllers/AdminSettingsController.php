@@ -9,6 +9,14 @@ class AdminSettingsController extends AdminController {
    if($values['matomo_url'] && (!filter_var($values['matomo_url'],FILTER_VALIDATE_URL) || parse_url($values['matomo_url'],PHP_URL_SCHEME)!=='https' || parse_url($values['matomo_url'],PHP_URL_USER) || parse_url($values['matomo_url'],PHP_URL_QUERY) || parse_url($values['matomo_url'],PHP_URL_FRAGMENT)))throw new Exception('آدرس Matomo باید HTTPS و بدون پارامتر یا نام کاربری باشد.');
    if($values['matomo_site_id'] && (!ctype_digit($values['matomo_site_id']) || (int)$values['matomo_site_id']<1))throw new Exception('شناسه سایت Matomo معتبر نیست.');
    if(($values['matomo_url']==='')!==($values['matomo_site_id']===''))throw new Exception('آدرس Matomo و شناسه سایت را با هم وارد کنید.');
+   if(AccessService::isSuperAdmin()){
+    foreach(array('zarinpal_merchant','public_url') as $key){$raw=Yii::app()->request->getPost($key,'');if(!is_string($raw))throw new Exception('تنظیم درگاه معتبر نیست.');$values[$key]=trim($raw);}
+    if($values['zarinpal_merchant']&&!preg_match('/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/iD',$values['zarinpal_merchant']))throw new Exception('Merchant ID معتبر نیست.');
+    $values['zarinpal_mode']=Yii::app()->request->getPost('zarinpal_mode','sandbox')==='live'?'live':'sandbox';$values['zarinpal_enabled']=Yii::app()->request->getPost('zarinpal_enabled')==='1'?'1':'0';
+    if($values['public_url']&&(!filter_var($values['public_url'],FILTER_VALIDATE_URL)||!in_array(parse_url($values['public_url'],PHP_URL_SCHEME),array('http','https'),true)||parse_url($values['public_url'],PHP_URL_USER)||parse_url($values['public_url'],PHP_URL_QUERY)||parse_url($values['public_url'],PHP_URL_FRAGMENT)))throw new Exception('آدرس عمومی سایت معتبر نیست.');
+    if($values['zarinpal_enabled']==='1'&&(!$values['zarinpal_merchant']||!$values['public_url']||($values['zarinpal_mode']==='live'&&parse_url($values['public_url'],PHP_URL_SCHEME)!=='https')))throw new Exception('برای فعال‌سازی، Merchant ID و آدرس عمومی معتبر لازم است؛ حالت واقعی به HTTPS نیاز دارد.');
+   }
+   foreach(array('shipping_fee','shipping_free_threshold') as $key)$values[$key]=(string)Money::parse(Yii::app()->request->getPost($key,'0'));
    $values['currency']=(string)Yii::app()->request->getPost('currency');if(!in_array($values['currency'],array('toman','rial'),true))throw new Exception('واحد پول معتبر نیست.');
    foreach(array('reservation_minutes'=>array(1,10080),'analytics_retention_days'=>array(7,365)) as $key=>$range){$raw=(string)Yii::app()->request->getPost($key);if(!ctype_digit($raw) || (int)$raw<$range[0] || (int)$raw>$range[1])throw new Exception('مدت رزرو یا نگهداری آمار معتبر نیست.');$values[$key]=$raw;}
    foreach(array('commerce_enabled','catalog_show_prices','analytics_enabled') as $key)$values[$key]=Yii::app()->request->getPost($key)==='1'?'1':'0';

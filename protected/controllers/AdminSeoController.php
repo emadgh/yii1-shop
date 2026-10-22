@@ -1,0 +1,8 @@
+<?php
+class AdminSeoController extends AdminController {
+ public function actionIndex(){if(!AccessService::isSuperAdmin())throw new CHttpException(403);$error='';$db=Yii::app()->db;
+  if(Yii::app()->request->isPostRequest){try{$source=Yii::app()->request->getPost('source','');$target=Yii::app()->request->getPost('target','');foreach(array($source,$target) as $p)if(!is_string($p)||strlen($p)>255||!preg_match('~^/(product|blog|category|collection)/[a-z0-9-]+$~D',$p))throw new Exception('آدرس را به صورت مسیر داخلی محصول، مقاله، دسته یا کالکشن وارد کنید.');if($source===$target||$db->createCommand('SELECT COUNT(*) FROM redirects WHERE source=:target OR target=:source')->queryScalar(array(':target'=>$target,':source'=>$source)))throw new Exception('زنجیره یا چرخه تغییر آدرس مجاز نیست.');$db->createCommand()->insert('redirects',array('source'=>$source,'target'=>$target));Audit::record('redirects',$source,'create',array('target'=>$target));$this->refresh();}catch(Exception $e){$error='ثبت انجام نشد؛ مسیر تکراری، زنجیره و حلقه مجاز نیست.';}}
+  $this->pageTitle='تغییر آدرس صفحات';$this->render('//admin/seo/index',array('error'=>$error,'rows'=>$db->createCommand('SELECT * FROM redirects ORDER BY source')->queryAll()));
+ }
+ public function actionDelete(){if(!AccessService::isSuperAdmin())throw new CHttpException(403);$this->requirePost();$source=Yii::app()->request->getPost('source','');if(!is_string($source))throw new CHttpException(422);Yii::app()->db->createCommand()->delete('redirects','source=:s',array(':s'=>$source));Audit::record('redirects',$source,'delete');$this->redirect(array('adminSeo/index'));}
+}

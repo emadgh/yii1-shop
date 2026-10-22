@@ -32,3 +32,5 @@ try {
  $tx->commit(); echo "Upgrade complete. Existing data preserved.\n";
 } catch(Exception $e) { if($tx && $tx->active)$tx->rollback(); fwrite(STDERR,$e->getMessage()."\n");exit(1); }
 require __DIR__.'/upgrade-cms.php';
+
+require __DIR__.'/upgrade-shop.php';

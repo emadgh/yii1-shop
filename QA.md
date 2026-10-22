@@ -31,7 +31,7 @@ Re-run with:
 
 The service and race suites use disposable SQLite copies. Browser tests create and remove temporary products/posts/media, and leave a cancelled test order in the order history. Runtime images and logs are in `protected/runtime`. The browser scripts use this machine's existing Chrome/Playwright paths.
 
-Scope: MySQL code paths were not executed here. Payment confirmation is manual; no bank gateway was introduced. Reservation expiry runs every 10 seconds in the local worker and on incoming application requests; a production server needs its own worker or minute scheduler as described in FEATURES.md.
+Initial baseline scope (before the operations update below): MySQL was not exercised and payment confirmation was manual. See the current MySQL/Zarinpal verification section below. Reservation expiry runs every 10 seconds in the local worker and on incoming application requests; a production server needs its own worker or minute scheduler as described in FEATURES.md.
 
 
 ## CMS and theme customization verification — 2026-10-22
@@ -54,7 +54,7 @@ Scope: tested on PHP 8.4 / SQLite / Chrome. MySQL execution and an external Mato
 - 22 isolated SQLite assertions passed for actual discounted-price sorting/filtering, Persian/grouped numeric input, rial conversion, combined filters, enum validation, literal/wildcard escaping, sort whitelisting, aggregate report filtering, scoped order items, removed-product fallback, daily visit counts, zero-day filling, paused analytics and consistent reporting boundaries.
 - Browser checks passed for dashboard daily bars, server-derived totals, pagination, column controls and sortable headings across all management listings, combined filters preserved after reload, reset, independent report grids, matching status colors/selection, linked order thumbnails, 90-day charts and mobile overflow.
 - The existing product/blog/media/checkout/HTTP/theme browser suites passed after the GridView migration. New tests are included in the isolated browser runner; the HTTP reconciliation assertion now checks result badges rather than matching filter dropdown option labels.
-- Filter inputs use bound parameters; sort expressions and enum choices are defined by the application. Reports filter the complete dataset before pagination. MySQL remains outside the locally exercised runtime.
+- Filter inputs use bound parameters; sort expressions and enum choices are defined by the application. Reports filter the complete dataset before pagination. MySQL was outside that initial verification; the operations update below adds real MySQL smoke coverage.
 
 ## Category workspace and scoped PJAX — 2026-10-22
 
@@ -71,3 +71,13 @@ Scope: tested on PHP 8.4 / SQLite / Chrome. MySQL execution and an external Mato
 - Dedicated browser coverage exercises product-page Ajax add with automatic navbar opening, popup quantity updates, cart-page quantity/removal, synchronized quantities, unchanged document markers, quantity validation, stock caps and CSRF rejection.
 - Browser checks open the Jalali picker after PJAX, save coupon dates and compare the canonical SQL values, exercise grid date pickers, inspect category thumbnail sizing, and check popup bounds on mobile and across all four themes.
 - The browser harness supports `--cart` for focused checks using a temporary SQLite database. The full suite also runs these checks. Local validation uses PHP 8.4 / SQLite / Chrome; MySQL and actual PHP 7.4 execution are not covered locally. Composer resolves against PHP 7.4.33 for dependency compatibility.
+
+## Shop operations and MySQL — 2026-10-22
+
+- Local database `yii1_shop` created on MySQL 9.1.0, 127.0.0.1:3306. Existing SQLite records imported with IDs preserved; SQLite retained. Root credentials are local-only. The running storefront now uses MySQL. Fixed SQLite initialization statements leaking into a MySQL configuration and fixed Yii DISTINCT column quoting in the facet query.
+- 18 checks passed on a disposable real MySQL database: shipping-inclusive frozen order totals, InnoDB stock reservation, hashed tracking token, sandbox URL and Rial payload, server verification, duplicate callback receipt guard, late-payment review, RFC TOTP vector, encryption roundtrip, Persian SQL search, transactional outbox, warning deduplication and independent variant reserve/cancel stock.
+- Dedicated operations browser smoke passed: blank/disabled Zarinpal settings, shipping persistence, private order tracking, operations grids, CSV export/import, managed 301 redirect, sitemap, variant selection, TOTP activation/replay protection and content-role route/sidebar restrictions.
+- Full isolated browser suite passed after these changes, including product/blog/media/checkout, four themes/mobile, scoped PJAX and category drag/drop. Backup test copied media, verified checksum, changed fixture data and successfully restored the original values into that disposable database.
+- PHP/JavaScript syntax and existing commerce service checks passed. CI now provisions MySQL 8.4 for a separate integration smoke job step; the remote run is not claimed as verified locally.
+- External payment responses are controlled test fixtures. No real or network sandbox payment was attempted without a Merchant ID. SMTP/Kavenegar delivery is untested without service credentials and remains inactive. Bank refunds and review transactions require operator reconciliation; the internal ledger does not execute a bank refund.
+- Address province/city fields are text fields, not a maintained geographic dropdown dataset. Imports support CSV, not native XLSX. Warehouse role is reporting-only; stock writes remain manager operations. TOTP key backup is required for account recovery.

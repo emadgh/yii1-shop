@@ -1,7 +1,7 @@
 <?php
 class StoreIdentity extends CUserIdentity
 {
-    private $_id;
+    private $_id;public $otp='';
     public function authenticate()
     {
         $user=User::model()->findByAttributes(array('email'=>strtolower(trim($this->username))));
@@ -9,6 +9,7 @@ class StoreIdentity extends CUserIdentity
            $this->errorCode=self::ERROR_PASSWORD_INVALID;
            return false;
         }
+        if(!TwoFactor::authenticate($user,$this->otp)){$this->errorCode=self::ERROR_PASSWORD_INVALID;return false;}
         $this->_id=(int)$user->id;
         $this->username=$user->name;
         $this->setState('role',$user->role);

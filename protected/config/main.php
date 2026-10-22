@@ -23,10 +23,10 @@ $config=array(
     'user'=>array('allowAutoLogin'=>false,'loginUrl'=>array('site/login')),
     'request'=>array('enableCsrfValidation'=>true,'enableCookieValidation'=>true,'csrfCookie'=>array('httpOnly'=>true,'sameSite'=>'Lax')),
     'session'=>array('cookieParams'=>array('httponly'=>true,'samesite'=>'Lax')),
-    'urlManager'=>array(
+    'urlManager'=>array('class'=>'application.components.StoreUrlManager',
        'urlFormat'=>'path','showScriptName'=>false,
        'rules'=>array(
-         ''=>'site/index',
+         ''=>'site/index','sitemap.xml'=>'seo/sitemap','robots.txt'=>'seo/robots',
          'shop'=>'shop/index',
          'collection/<slug:[a-z0-9-]+>'=>'collection/view',
          'product/<slug:[a-z0-9-]+>'=>'shop/view',
@@ -46,4 +46,5 @@ $config=array(
   'params'=>array('currency'=>'تومان','uploadsDir'=>$root.'/public/uploads','uploadsUrl'=>'/uploads'),
 );
 if(is_file(__DIR__.'/local.php')) $config=CMap::mergeArray($config,require __DIR__.'/local.php');
+if(strpos($config['components']['db']['connectionString'],'mysql:')===0)$config['components']['db']['initSQLs']=array();
 return $config;

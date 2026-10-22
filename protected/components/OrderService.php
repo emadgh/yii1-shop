@@ -16,7 +16,7 @@ class OrderService {
      $orderId=$db->getLastInsertID(); $subtotal=0;
      ksort($items,SORT_NUMERIC);
      foreach($items as $id=>$qty) {
-       $qty=(int)$qty; if($qty<1 || $qty>99) throw new Exception('تعداد کالا باید بین ۱ تا ۹۹ باشد.');
+       $candidate=Product::model()->findByPk($id);if($candidate&&!$candidate->parent_product_id&&$candidate->variants())throw new Exception('ابتدا تنوع محصول را انتخاب کنید.');$qty=(int)$qty; if($qty<1 || $qty>99) throw new Exception('تعداد کالا باید بین ۱ تا ۹۹ باشد.');
        $changed=$db->createCommand("UPDATE products SET stock=stock-:q WHERE id=:id AND stock>=:q2 AND status='published'")->execute(array(':q'=>$qty,':q2'=>$qty,':id'=>(int)$id));
        if($changed!==1) throw new Exception('موجودی یکی از کالاها کافی نیست؛ سبد خرید را بررسی کنید.');
        $p=$db->createCommand('SELECT * FROM products WHERE id=:id')->queryRow(true,array(':id'=>(int)$id));
@@ -24,6 +24,7 @@ class OrderService {
        $db->createCommand()->insert('order_items',array('order_id'=>$orderId,'product_id'=>$id,'product_title'=>$p['title'],'sku'=>$p['sku'],'price'=>$price,'quantity'=>$qty,'line_total'=>$line));
        self::movement($id,$orderId,-$qty,'reserve');
      }
+     $shippingMethod=$customer['shipping_method']??'standard';$shipping=Shipping::quote($shippingMethod,$subtotal);
      $discount=0; $couponCode=strtoupper(trim($couponCode));
      if($couponCode!=='') {
        $sql='SELECT * FROM coupons WHERE code=:code'.($db->driverName==='mysql'?' FOR UPDATE':'');
@@ -32,20 +33,20 @@ class OrderService {
        $changed=$db->createCommand('UPDATE coupons SET used_count=used_count+1 WHERE id=:id AND (usage_limit=0 OR used_count<usage_limit)')->execute(array(':id'=>$coupon['id']));
        if($changed!==1) throw new Exception('ظرفیت کد تخفیف تکمیل شده است.');
      }
-     $db->createCommand()->update('orders',array('subtotal'=>$subtotal,'discount_total'=>$discount,'total'=>$subtotal-$discount,'coupon_code'=>$couponCode),'id=:id',array(':id'=>$orderId));
+     $db->createCommand()->update('orders',array('subtotal'=>$subtotal,'discount_total'=>$discount,'total'=>$subtotal-$discount+$shipping,'shipping_total'=>$shipping,'shipping_method'=>$shippingMethod,'province'=>$customer['province']??'','city'=>$customer['city']??'','postal_code'=>$customer['postal_code']??'','coupon_code'=>$couponCode),'id=:id',array(':id'=>$orderId));
      self::event($orderId,'','pending'); $tx->commit(); return $number;
    } catch(Exception $e) { if($tx->active)$tx->rollback(); throw $e; }
  }
- private static function event($id,$old,$new) { Yii::app()->db->createCommand()->insert('order_events',array('order_id'=>$id,'from_status'=>$old,'to_status'=>$new,'created_at'=>date('Y-m-d H:i:s'))); }
+ private static function event($id,$old,$new) { Notifications::order($id,$new); Yii::app()->db->createCommand()->insert('order_events',array('order_id'=>$id,'from_status'=>$old,'to_status'=>$new,'created_at'=>date('Y-m-d H:i:s'))); }
  public static function changeStatus($id,$new) {
-   $db=Yii::app()->db; $tx=$db->beginTransaction();
+   $db=Yii::app()->db; $owns=!$db->getCurrentTransaction();$tx=$db->getCurrentTransaction()?:$db->beginTransaction();
    try {
      // A conditional write both locks and serializes updates on SQLite and InnoDB.
      $sql='SELECT * FROM orders WHERE id=:id'.($db->driverName==='mysql'?' FOR UPDATE':'');
      $row=$db->createCommand($sql)->queryRow(true,array(':id'=>$id));
      if(!$row) throw new Exception('سفارش پیدا نشد.');
      $old=$row['status']; $map=self::transitions();
-     if($old===$new) { $tx->commit();return; }
+     if($old===$new) { if($owns)$tx->commit();return; }
      if(!isset($map[$old]) || !in_array($new,$map[$old],true)) throw new Exception('این تغییر وضعیت مجاز نیست.');
      if(in_array($old,array('pending','confirmed'),true) && $new!=='expired' && $row['reserved_until'] && $row['reserved_until']<=date('Y-m-d H:i:s')) throw new Exception('مهلت رزرو تمام شده است.');
      if($new==='expired' && (!$row['reserved_until'] || $row['reserved_until']>date('Y-m-d H:i:s'))) throw new Exception('رزرو هنوز منقضی نشده است.');
@@ -64,8 +65,8 @@ class OrderService {
        if(!$row['paid_at'] && $row['coupon_code']) $db->createCommand('UPDATE coupons SET used_count=used_count-1 WHERE code=:c AND used_count>0')->execute(array(':c'=>$row['coupon_code']));
      }
      if($new==='paid' || ($new==='returned' && $row['paid_at'])) $db->createCommand()->insert('financial_entries',array('order_id'=>$id,'kind'=>$new==='paid'?'receipt':'refund','amount'=>$new==='paid'?$row['total']:-$row['total'],'created_at'=>date('Y-m-d H:i:s')));
-     self::event($id,$old,$new); $tx->commit();
-   } catch(Exception $e) { if($tx->active)$tx->rollback();throw $e; }
+     Audit::record('orders',$id,'status',array('from'=>$old,'to'=>$new));self::event($id,$old,$new); if($owns)$tx->commit();
+   } catch(Exception $e) { if($owns&&$tx->active)$tx->rollback();throw $e; }
  }
  public static function expire() {
    $ids=Yii::app()->db->createCommand("SELECT id FROM orders WHERE status IN ('pending','confirmed') AND reserved_until<=:now ORDER BY id LIMIT 200")->queryColumn(array(':now'=>date('Y-m-d H:i:s')));

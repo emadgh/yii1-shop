@@ -15,8 +15,9 @@ class SiteController extends AppController
       if(Yii::app()->request->isPostRequest) {
         $email=trim((string)Yii::app()->request->getPost('email',''));
         $password=(string)Yii::app()->request->getPost('password','');
+        LoginGuard::attempt($email);
         $identity=new StoreIdentity($email,$password);
-        if($identity->authenticate()) {
+        $identity->otp=Yii::app()->request->getPost('otp','');if($identity->authenticate()) {
           Yii::app()->user->login($identity,0);
           $this->redirect(array('adminDashboard/index'));
         }

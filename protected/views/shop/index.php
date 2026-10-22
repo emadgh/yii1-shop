@@ -6,7 +6,7 @@
 <?= CHtml::beginForm(array('shop/index'),'get',array('class'=>'searchbar','data-pjax-form'=>'1')) ?>
 <?php if($category)echo CHtml::hiddenField('category',$category);if($tag)echo CHtml::hiddenField('tag',$tag); ?><?= CHtml::textField('q',$q,array('placeholder'=>'نام، مشخصات فنی، برند، تگ یا متادیتا…','aria-label'=>'جستجوی محصول')) ?>
 <?= CHtml::dropDownList('sort',$sort,array('new'=>'جدیدترین','price-asc'=>'ارزان‌ترین','price-desc'=>'گران‌ترین'),array('aria-label'=>'مرتب‌سازی')) ?>
-<?= CHtml::submitButton('جستجو',array('class'=>'btn btn-primary')) ?><?= CHtml::endForm() ?>
+<?php if(Commerce::showPrices()): ?><?= CHtml::textField('min',$min,array('class'=>'money-input','placeholder'=>'حداقل قیمت','aria-label'=>'حداقل قیمت به '.Money::unit())) ?><?= CHtml::textField('max',$max,array('class'=>'money-input','placeholder'=>'حداکثر قیمت','aria-label'=>'حداکثر قیمت به '.Money::unit())) ?><?php endif; ?><?php foreach($facetOptions as $name=>$options): ?><?= CHtml::dropDownList('facet['.$name.']',$facet[$name]??'',$options,array('prompt'=>$name.'؛ همه','aria-label'=>$name)) ?><?php endforeach; ?><?= CHtml::submitButton('جستجو',array('class'=>'btn btn-primary')) ?><?= CHtml::endForm() ?>
 <?php $products=$provider->getData(); if(!$products): ?><div class="empty">محصولی مطابق جستجو پیدا نشد.</div><?php else: ?><div class="product-grid">
 <?php foreach($products as $p): $this->renderPartial('_card',array('product'=>$p)); endforeach; ?>
 </div><?php endif; ?>

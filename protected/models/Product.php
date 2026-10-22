@@ -4,7 +4,7 @@ class Product extends BaseRecord
     public static function model($className=__CLASS__) { return parent::model($className); }
     public function tableName() { return 'products'; }
     public function rules() { return array(
-      array('title, sku, price, stock, status','required'),
+      array('title, sku, price, stock, status','required'),array('parent_product_id','numerical','integerOnly'=>true,'min'=>1,'allowEmpty'=>true),array('parent_product_id','validateParentProduct'),array('variant_label','length','max'=>190),
       array('title, seo_title','length','max'=>255),array('sku','length','max'=>120),
       array('slug','length','max'=>190),array('slug, sku','unique'),
       array('slug','match','pattern'=>'/^[a-z0-9]+(?:-[a-z0-9]+)*$/','message'=>'Slug باید انگلیسی و شامل حروف کوچک، ارقام یا خط تیره باشد.'),
@@ -30,6 +30,8 @@ class Product extends BaseRecord
        if(!$this->slug) $this->slug=Slug::unique('Product',$this->title,$this->isNewRecord ? null : $this->id);
        return parent::beforeValidate();
     }
+    public function validateParentProduct(){if(!$this->parent_product_id){$this->parent_product_id=null;return;}$parent=self::model()->findByPk($this->parent_product_id);if(!$parent||$parent->parent_product_id||$parent->id==$this->id||(!$this->isNewRecord&&self::model()->countByAttributes(array('parent_product_id'=>$this->id))))$this->addError('parent_product_id','محصول والد معتبر نیست؛ تنوع نمی‌تواند والد تنوع دیگری باشد.');}
+    public function variants(){return self::model()->findAllByAttributes(array('parent_product_id'=>$this->parent_product_id?:$this->id,'status'=>'published'),array('order'=>'id'));}
     public function cover() { return $this->images ? UploadService::url($this->images[0]->filename) : ''; }
     public function link() { return Yii::app()->createUrl('shop/view',array('slug'=>$this->slug)); }
     public function tagsText() { return implode(', ',array_map(function($tag){return $tag->name;},$this->tags)); }

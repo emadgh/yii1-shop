@@ -38,6 +38,8 @@ async function navigate(url,push,options){
   // Refresh revision/data attributes while keeping the target element and its layout stable.
   if(selector)Array.from(content.attributes).forEach(function(a){if(a.name.indexOf('data-')===0)target.setAttribute(a.name,a.value);});
   document.title=wrapper.dataset.pjaxTitle||document.title;var description=document.querySelector('meta[name=description]');if(description)description.content=wrapper.dataset.pjaxDescription||'';
+  [['og:title',document.title],['og:description',wrapper.dataset.pjaxDescription||'']].forEach(function(pair){var meta=document.querySelector('meta[property="'+pair[0]+'"]');if(meta)meta.content=pair[1];});
+  var canonical=document.querySelector('link[rel=canonical]');if(canonical){var canonicalUrl=new URL(canonical.href);canonicalUrl.pathname=new URL(response.url).pathname;canonicalUrl.search='';canonical.href=canonicalUrl.href;var ogUrl=document.querySelector('meta[property="og:url"]');if(ogUrl)ogUrl.content=canonical.href;var ogImage=document.querySelector('meta[property="og:image"]');if(ogImage)ogImage.content=wrapper.dataset.pjaxImage?new URL(wrapper.dataset.pjaxImage,canonical.href).href:'';}
   var crumb=document.querySelector('.admin-breadcrumb');if(crumb)crumb.textContent='مدیریت / '+document.title;
   // Merge independent grid query changes if another region completed during this request.
   var finalUrl=new URL(response.url),requested=new URL(url),original=new URL(beforeUrl),current=new URL(location.href);

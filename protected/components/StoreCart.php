@@ -5,7 +5,7 @@ class StoreCart extends CApplicationComponent {
  private function integer($value,$minimum=0){if(!is_scalar($value)||!preg_match('/^[0-9]{1,9}$/D',(string)$value)||(int)$value<$minimum)throw new CHttpException(422,'تعداد یا شناسه محصول معتبر نیست.');return (int)$value;}
  public function setQuantity($id,$quantity){
   $id=$this->integer($id,1);$quantity=$this->integer($quantity);$items=$this->items();
-  if(!$quantity)unset($items[$id]);else{$product=Product::model()->findByPk($id);if(!$product||$product->status!=='published')throw new CHttpException(404,'محصول پیدا نشد.');if($product->stock<=0)throw new CHttpException(422,'موجودی محصول تمام شده است.');$items[$id]=min(99,(int)$product->stock,$quantity);}
+  if(!$quantity)unset($items[$id]);else{$product=Product::model()->findByPk($id);if(!$product||$product->status!=='published')throw new CHttpException(404,'محصول پیدا نشد.');if(!$product->parent_product_id&&$product->variants())throw new CHttpException(422,'ابتدا رنگ یا سایز محصول را انتخاب کنید.');if($product->stock<=0)throw new CHttpException(422,'موجودی محصول تمام شده است.');$items[$id]=min(99,(int)$product->stock,$quantity);}
   Yii::app()->session->add('cart',$items);
  }
  public function add($id,$quantity){$id=$this->integer($id,1);$quantity=$this->integer($quantity,1);$this->summary();$items=$this->items();$this->setQuantity($id,($items[$id]??0)+min(99,$quantity));}

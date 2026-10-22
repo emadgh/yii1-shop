@@ -15,7 +15,7 @@ class AdminProductController extends AdminController {
      try {
        $data=$_POST['Product'];foreach(array('price','compare_price') as $k)$data[$k]=Money::parse(isset($data[$k]) && $data[$k]!==''?$data[$k]:'0');
        if(isset($data['discount_type']) && $data['discount_type']==='fixed')$data['discount_value']=Money::parse($data['discount_value']);
-       $model->attributes=$data;$model->featured=!empty($data['featured'])?1:0;if($model->category_id==='')$model->category_id=null;
+       $model->attributes=$data;if($model->parent_product_id==='')$model->parent_product_id=null;$model->featured=!empty($data['featured'])?1:0;if($model->category_id==='')$model->category_id=null;
        $specPairs=$this->pairs($specs);$metaPairs=$this->pairs($meta);$media=MediaService::selected($selected,true);
        if($model->validate()) {
          $tx=$db->beginTransaction();
@@ -47,6 +47,6 @@ class AdminProductController extends AdminController {
      $seen[$key]=true;$out[]=array($key,$value);
    }return $out;
  }
- public function actionDelete($id) { $this->requirePost();$m=$this->load($id);$held=Yii::app()->db->createCommand("SELECT COUNT(*) FROM order_items i JOIN orders o ON o.id=i.order_id WHERE i.product_id=:id AND o.stock_held=1 AND o.status NOT IN ('completed','shipped','paid')")->queryScalar(array(':id'=>$id));if($held)$this->flash('محصول رزرو فعال دارد؛ ابتدا سفارش را تعیین تکلیف کنید.','error');else{Yii::app()->db->createCommand()->delete('collection_products','product_id=:id',array(':id'=>$id));$m->delete();$this->flash('محصول حذف شد؛ رسانه‌ها در کتابخانه باقی ماندند.');}$this->redirect(array('adminProduct/index')); }
+ public function actionDelete($id) { $this->requirePost();$m=$this->load($id);if(Product::model()->countByAttributes(array('parent_product_id'=>$id)))throw new CHttpException(422,'ابتدا تنوع‌های محصول را جدا یا حذف کنید.');$held=Yii::app()->db->createCommand("SELECT COUNT(*) FROM order_items i JOIN orders o ON o.id=i.order_id WHERE i.product_id=:id AND o.stock_held=1 AND o.status NOT IN ('completed','shipped','paid')")->queryScalar(array(':id'=>$id));if($held)$this->flash('محصول رزرو فعال دارد؛ ابتدا سفارش را تعیین تکلیف کنید.','error');else{Yii::app()->db->createCommand()->delete('collection_products','product_id=:id',array(':id'=>$id));$m->delete();$this->flash('محصول حذف شد؛ رسانه‌ها در کتابخانه باقی ماندند.');}$this->redirect(array('adminProduct/index')); }
  private function load($id){$m=Product::model()->findByPk($id);if(!$m)$this->notFound();return $m;}
 }

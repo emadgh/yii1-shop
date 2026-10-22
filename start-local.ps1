@@ -3,7 +3,7 @@ $ErrorActionPreference='Stop'
 Set-Location $PSScriptRoot
 if(!$PhpBinary){$command=Get-Command php -ErrorAction SilentlyContinue;if($command){$PhpBinary=$command.Source}elseif(Test-Path 'H:\wamp64\bin\php\php8.4.0\php.exe'){$PhpBinary='H:\wamp64\bin\php\php8.4.0\php.exe'}else{throw 'PHP not found. Add PHP to PATH or use -PhpBinary.'}}
 $phpOptions=@()
-if($PhpBinary -match 'wamp64'){$extensions=Join-Path (Split-Path $PhpBinary) 'ext';$phpOptions=@('-n','-d',"extension_dir=$extensions");foreach($extension in @('mbstring','fileinfo','pdo_sqlite','openssl','gd')){$phpOptions+=@('-d',"extension=php_$extension.dll")}}
+if($PhpBinary -match 'wamp64'){$extensions=Join-Path (Split-Path $PhpBinary) 'ext';$phpOptions=@('-n','-d',"extension_dir=$extensions");foreach($extension in @('mbstring','fileinfo','pdo_sqlite','pdo_mysql','openssl','gd')){$phpOptions+=@('-d',"extension=php_$extension.dll")}}
 $phpOptions+=@('-d','upload_max_filesize=10M','-d','post_max_size=12M','-d','memory_limit=256M','-d','session.save_path=protected/runtime')
 if(Get-NetTCPConnection -State Listen -LocalPort $Port -ErrorAction SilentlyContinue){throw "Port $Port is already in use."}
 & $PhpBinary @phpOptions tools/upgrade.php
