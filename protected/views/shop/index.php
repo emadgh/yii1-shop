@@ -2,7 +2,7 @@
 <div class="shop-layout"><aside class="filter-panel"><h3>دسته‌بندی‌ها</h3>
 <?= CHtml::link('همه محصولات',array('shop/index'),array('data-pjax'=>'1','class'=>!$category?'filter-active':'')) ?>
 <?php foreach($categories as $cat): ?><?= CHtml::link(CHtml::encode($cat->name),array('shop/category','slug'=>$cat->slug),array('data-pjax'=>'1','class'=>$cat->slug===$category?'filter-active':'')) ?><?php endforeach; ?></aside>
-<div class="shop-results"><?php if($category): $current=Category::model()->findByAttributes(array("slug"=>$category)); ?><section class="category-description"><h2><?= CHtml::encode($current->name) ?></h2><div class="rich-content"><?= Content::markdown($current->description) ?></div><?php $this->widget("CategoryTiles",array("parent"=>$current->id)); ?></section><?php endif; ?>
+<div class="shop-results" id="shop-results-region" data-pjax-region="1"><?php if($category): $current=Category::model()->findByAttributes(array("slug"=>$category)); ?><section class="category-description"><h2><?= CHtml::encode($current->name) ?></h2><div class="rich-content"><?= Content::markdown($current->description) ?></div><?php $this->widget("CategoryTiles",array("parent"=>$current->id)); ?></section><?php endif; ?>
 <?= CHtml::beginForm(array('shop/index'),'get',array('class'=>'searchbar','data-pjax-form'=>'1')) ?>
 <?php if($category)echo CHtml::hiddenField('category',$category);if($tag)echo CHtml::hiddenField('tag',$tag); ?><?= CHtml::textField('q',$q,array('placeholder'=>'نام، مشخصات فنی، برند، تگ یا متادیتا…','aria-label'=>'جستجوی محصول')) ?>
 <?= CHtml::dropDownList('sort',$sort,array('new'=>'جدیدترین','price-asc'=>'ارزان‌ترین','price-desc'=>'گران‌ترین'),array('aria-label'=>'مرتب‌سازی')) ?>

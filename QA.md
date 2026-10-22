@@ -55,3 +55,12 @@ Scope: tested on PHP 8.4 / SQLite / Chrome. MySQL execution and an external Mato
 - Browser checks passed for dashboard daily bars, server-derived totals, pagination, column controls and sortable headings across all management listings, combined filters preserved after reload, reset, independent report grids, matching status colors/selection, linked order thumbnails, 90-day charts and mobile overflow.
 - The existing product/blog/media/checkout/HTTP/theme browser suites passed after the GridView migration. New tests are included in the isolated browser runner; the HTTP reconciliation assertion now checks result badges rather than matching filter dropdown option labels.
 - Filter inputs use bound parameters; sort expressions and enum choices are defined by the application. Reports filter the complete dataset before pagination. MySQL remains outside the locally exercised runtime.
+
+## Category workspace and scoped PJAX — 2026-10-22
+
+- 13 isolated SQLite assertions passed: subtree moves, descendant preservation, before/after/root operations, sibling renumbering, cycle/self/unknown target rejection, stale move/edit rejection and rollback.
+- Category browser checks passed with actual pointer drag/drop: left sticky editor inside viewport, contextual search and collapse, persisted subtree moves, preserved unsaved text, CSRF and stale/cycle rejection, Ajax validation/save, local locking and mobile layout.
+- Delayed-request checks verified that only the requested grid receives an overlay and inert interaction lock. Neighboring DOM references remained identical. Filters, shorter final-page pagination and back navigation preserved scroll.
+- Simulated failed requests retained the existing table, cleared the overlay and allowed retry. Independent report filters remained in both visible controls and the URL after other-grid updates.
+- `node tools/verify-cms-browser.cjs --all` passed the CMS, product/blog/media/checkout, HTTP, theme, admin-table and new category/PJAX suites. `--pjax` runs the focused category/PJAX browser checks on a temporary database.
+- The existing 24 CMS checks also passed after adding optional hierarchy revisions. PHP/JavaScript syntax and Git whitespace checks passed. Local runtime remains PHP 8.4 / SQLite / Chrome.

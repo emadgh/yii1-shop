@@ -4,6 +4,7 @@ foreach(array('/assets/css/app.css','/assets/css/modern.css') as $file)$cs->regi
 $themeKey=ThemeService::key();$theme=ThemeService::info();
 if($themeKey!=='classic'){ $cs->registerCssFile(Yii::app()->baseUrl.'/assets/themes/storefront.css');$cs->registerCssFile(Yii::app()->baseUrl.'/assets/themes/'.$themeKey.'.css'); }
 $cs->registerCssFile(Yii::app()->baseUrl.'/assets/css/cms.css');
+$cs->registerCssFile(Yii::app()->baseUrl.'/assets/css/async.css');
 foreach(array('app','pjax','cms') as $script)$cs->registerScriptFile(Yii::app()->baseUrl.'/assets/js/'.$script.'.js',CClientScript::POS_END);
 ?>
 <!DOCTYPE html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="<?= CHtml::encode($this->metaDescription) ?>"><title><?= CHtml::encode($this->pageTitle) ?></title><meta name="csrf-name" content="<?= CHtml::encode(Yii::app()->request->csrfTokenName) ?>"><meta name="csrf-token" content="<?= CHtml::encode(Yii::app()->request->csrfToken) ?>"><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="preload" href="/assets/fonts/Vazir-Regular.woff2" as="font" type="font/woff2" crossorigin></head>

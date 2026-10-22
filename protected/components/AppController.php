@@ -9,13 +9,16 @@ class AppController extends CController
     public function render($view,$data=null,$return=false)
     {
         $req=Yii::app()->request;
-        // Only regular GET page navigation is eligible for a layout-free response.
-        if($req->getRequestType()==='GET' && $req->getIsAjaxRequest() && isset($_SERVER['HTTP_X_PJAX']) && $_SERVER['HTTP_X_PJAX']==='true') {
+        // POST fragments are explicit opt-in; CSRF and controller access checks still run.
+        $fragmentMethod=$req->getRequestType()==='GET'||($req->getRequestType()==='POST'&&($_SERVER['HTTP_X_PJAX_FORM']??'')==='true');
+        if($fragmentMethod && $req->getIsAjaxRequest() && isset($_SERVER['HTTP_X_PJAX']) && $_SERVER['HTTP_X_PJAX']==='true') {
             Yii::app()->getClientScript()->reset();
             $html=$this->renderPartial($view,$data,true,false);
             $title=CHtml::encode($this->pageTitle);
             $description=CHtml::encode($this->metaDescription);
             $storeTheme=$this->layout==='//layouts/admin'?'admin':ThemeService::key();
+            $messages='';foreach(array('success','error') as $kind)if(Yii::app()->user->hasFlash($kind))$messages.='<div class="flash flash-'.$kind.'">'.CHtml::encode(Yii::app()->user->getFlash($kind)).'</div>';
+            $html=$messages.$html;
             $html='<div data-pjax-title="'.$title.'" data-pjax-description="'.$description.'" data-store-theme="'.CHtml::encode($storeTheme).'">'.$html.'</div>';
             if($return) return $html;
             echo $html;

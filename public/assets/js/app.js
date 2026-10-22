@@ -4,12 +4,25 @@ var base=document.body.dataset.base||'';
 var csrf=document.querySelector('meta[name="csrf-token"]');
 var csrfName=document.querySelector('meta[name="csrf-name"]');
 var pending=0,progressTimer;
+var busySections=new WeakMap(),nativeBusyReleases=[];
 window.ShopUI={
  progress:function(on){pending=Math.max(0,pending+(on?1:-1));var el=document.getElementById('page-progress');if(el)el.hidden=pending===0;},
  toast:function(message,type){var el=document.createElement('div');el.className='toast toast-'+(type||'success');el.textContent=message;document.getElementById('toast-region').appendChild(el);setTimeout(function(){el.remove();},6000);},
  confirm:function(message){return messageBox(message,'confirm');},
  alert:function(message){return messageBox(message,'alert');},
  prompt:function(message,value){return messageBox(message,'prompt',value);}
+};
+ShopUI.busy=function(element,label){
+ if(!element)return function(){};var state=busySections.get(element);
+ if(!state){
+  var overlay=document.createElement('div');overlay.className='section-loading-overlay';overlay.setAttribute('role','status');overlay.setAttribute('aria-live','polite');
+  var badge=document.createElement('div');badge.className='section-loading-label';var spinner=document.createElement('span');spinner.className='section-loading-spinner';spinner.setAttribute('aria-hidden','true');badge.append(spinner,document.createTextNode(label||'در حال بارگذاری…'));overlay.append(badge);
+  state={count:0,overlay:overlay,aria:element.getAttribute('aria-busy'),position:getComputedStyle(element).position==='static',children:Array.from(element.children).map(function(n){var value=n.inert;n.inert=true;return {node:n,inert:value};})};
+  if(state.position)element.classList.add('section-busy-position');element.classList.add('section-is-busy');element.setAttribute('aria-busy','true');element.append(overlay);
+  state.place=function(){var rect=element.getBoundingClientRect(),start=Math.max(0,-rect.top),end=Math.min(rect.height,innerHeight-rect.top);badge.style.top=Math.max(20,(start+Math.max(start,end))/2)+'px';};
+  state.place();window.addEventListener('scroll',state.place,{passive:true});window.addEventListener('resize',state.place);busySections.set(element,state);
+ }
+ state.count++;var released=false;return function(){if(released)return;released=true;if(--state.count>0)return;state.overlay.remove();state.children.forEach(function(c){c.node.inert=c.inert;});element.classList.remove('section-is-busy');if(state.position)element.classList.remove('section-busy-position');if(state.aria===null)element.removeAttribute('aria-busy');else element.setAttribute('aria-busy',state.aria);window.removeEventListener('scroll',state.place);window.removeEventListener('resize',state.place);busySections.delete(element);};
 };
 var queue=Promise.resolve();
 function messageBox(message,type,value){
@@ -21,11 +34,11 @@ function messageBox(message,type,value){
  d.showModal();if(type==='prompt')input.focus();
  });};var result=queue.then(run);queue=result.then(function(){},function(){});return result;
 }
-function api(path,data){
+function api(path,data,section){
  var opt={credentials:'same-origin',headers:{'X-Requested-With':'XMLHttpRequest','Accept':'application/json'}};
  if(data){opt.method='POST';if(!(data instanceof FormData)){var form=new FormData();Object.keys(data).forEach(function(k){form.append(k,data[k]);});data=form;}data.append(csrfName.content,csrf.content);opt.body=data;}
- ShopUI.progress(true);
- return fetch(base+path,opt).then(function(r){return r.json().then(function(j){if(!r.ok||j.ok===false)throw new Error(j.error||'دریافت اطلاعات ناموفق بود.');return j;});}).finally(function(){ShopUI.progress(false);});
+ var release=section?ShopUI.busy(section,data?'در حال انجام…':'در حال بارگذاری…'):function(){};ShopUI.progress(true);
+ return fetch(base+path,opt).then(function(r){return r.json().then(function(j){if(!r.ok||j.ok===false)throw new Error(j.error||'دریافت اطلاعات ناموفق بود.');return j;});}).finally(function(){release();ShopUI.progress(false);});
 }
 window.ShopAPI=api;
 function init(){
@@ -56,7 +69,7 @@ function editor(textarea){
  [['B','متن پررنگ','**','**'],['I','متن مورب','*','*'],['H2','عنوان','\n## ',''],['≡','فهرست','\n- ',''],['❞','نقل قول','\n> ','']].forEach(function(x){var b=document.createElement('button');b.type='button';b.textContent=x[0];b.title=x[1];b.setAttribute('aria-label',x[1]);b.onclick=function(){insert(x[2],x[3]);};tools.append(b);});
  var link=document.createElement('button');link.type='button';link.textContent='پیوند';link.onclick=async function(){var url=await ShopUI.prompt('آدرس پیوند را وارد کنید','https://');if(url&&/^https?:\/\//i.test(url))insert('[',']('+url+')');};tools.append(link);
  var media=document.createElement('button');media.type='button';media.textContent='رسانه';media.onclick=function(){openMedia({multiple:false,accept:'image/*,application/pdf,text/plain',ids:[],onApply:function(rows){if(rows[0])insert(rows[0].mime.indexOf('image/')===0?'![':'[',']('+rows[0].url+')');}});};tools.append(media);
- var toggle=document.createElement('button');toggle.type='button';toggle.textContent='پیش‌نمایش';toggle.className='preview-toggle';toggle.onclick=async function(){if(!preview.hidden){preview.hidden=true;textarea.hidden=false;toggle.textContent='پیش‌نمایش';return;}try{var r=await api('/adminMedia/preview',{text:textarea.value});preview.innerHTML=r.html;preview.hidden=false;textarea.hidden=true;toggle.textContent='ویرایش';}catch(e){ShopUI.toast(e.message,'error');}};tools.append(toggle);
+ var toggle=document.createElement('button');toggle.type='button';toggle.textContent='پیش‌نمایش';toggle.className='preview-toggle';toggle.onclick=async function(){if(!preview.hidden){preview.hidden=true;textarea.hidden=false;toggle.textContent='پیش‌نمایش';return;}try{var r=await api('/adminMedia/preview',{text:textarea.value},box);preview.innerHTML=r.html;preview.hidden=false;textarea.hidden=true;toggle.textContent='ویرایش';}catch(e){ShopUI.toast(e.message,'error');}};tools.append(toggle);
  var hint=document.createElement('small');hint.className='editor-hint';hint.textContent='Markdown · متن پررنگ، عنوان، فهرست، پیوند و تصویر؛ همراه با پیش‌نمایش';box.append(hint);
 }
 document.addEventListener('click',function(e){
@@ -67,16 +80,16 @@ document.addEventListener('click',function(e){
  var clear=e.target.closest('[data-clear-media]');if(clear){var picker=clear.closest('.media-picker');picker.querySelector('.media-value').value='';picker.querySelector('.media-selection').replaceChildren();}
  if(e.target.closest('[data-library-open]'))openMedia({multiple:true,accept:'*',ids:[],library:true,onApply:function(){}});
  if(e.target.closest('[data-close-media]'))document.getElementById('media-dialog').close();
- if(e.target.closest('[data-apply-coupon]')){var input=document.querySelector('[name=coupon]');api('/cart/coupon',{code:input.value}).then(function(r){document.getElementById('coupon-feedback').textContent='تخفیف: '+r.discount+' · قابل پرداخت: '+r.total;ShopUI.toast('کد تخفیف معتبر است؛ هنگام ثبت نهایی دوباره بررسی می‌شود.');}).catch(function(err){document.getElementById('coupon-feedback').textContent=err.message;ShopUI.toast(err.message,'error');});}
+ if(e.target.closest('[data-apply-coupon]')){var input=document.querySelector('[name=coupon]');api('/cart/coupon',{code:input.value},input.closest('.panel')||input.parentElement).then(function(r){document.getElementById('coupon-feedback').textContent='تخفیف: '+r.discount+' · قابل پرداخت: '+r.total;ShopUI.toast('کد تخفیف معتبر است؛ هنگام ثبت نهایی دوباره بررسی می‌شود.');}).catch(function(err){document.getElementById('coupon-feedback').textContent=err.message;ShopUI.toast(err.message,'error');});}
 });
 document.addEventListener('change',function(e){if(e.target.matches('[data-discount-kind]')){var input=e.target.closest('form').querySelector('[data-discount-amount]');input.classList.toggle('money-input',e.target.value==='fixed');formatMoney(input);if(e.target.value!=='fixed')input.value=input.value.replace(/,/g,'');}});
 document.addEventListener('submit',function(e){
  var form=e.target;
  if(form.hasAttribute('data-confirm')&&!form.dataset.confirmed){e.preventDefault();e.stopImmediatePropagation();var submitter=e.submitter;ShopUI.confirm(form.dataset.confirm).then(function(ok){if(ok){form.dataset.confirmed='1';form.requestSubmit(submitter);delete form.dataset.confirmed;}});return;}
- if(!e.defaultPrevented&&form.method.toUpperCase()!=='GET')ShopUI.progress(true);
+ if(!e.defaultPrevented&&form.method.toUpperCase()==='POST'&&!(form.dataset.pjaxForm==='1'&&window.ShopPjax)){nativeBusyReleases.push(ShopUI.busy(form.closest('[data-pjax-region],.panel')||form,'در حال ثبت…'));ShopUI.progress(true);}
 },true);
 window.addEventListener('beforeunload',function(){ShopUI.progress(true);});
-window.addEventListener('pageshow',function(){pending=0;ShopUI.progress(false);});
+window.addEventListener('pageshow',function(){nativeBusyReleases.splice(0).forEach(function(release){release();});pending=0;ShopUI.progress(false);});
 document.addEventListener('yii-store:pjax-loaded',init);
 var mediaState,mediaRequest=0,mediaSearchTimer;
 function accepts(row,accept){return !accept||accept==='*'||accept.split(',').some(function(x){x=x.trim();return x==='image/*'?row.mime.indexOf('image/')===0:row.mime===x;});}
@@ -99,7 +112,7 @@ function mediaCard(r,overview){
 }
 async function loadMedia(reset){
  var state=mediaState,request=++mediaRequest,grid=document.getElementById('media-grid');if(reset){state.offset=0;grid.replaceChildren();grid.setAttribute('aria-busy','true');}
- try{var response=await api('/adminMedia/list?q='+encodeURIComponent(state.q)+'&offset='+state.offset);if(request!==mediaRequest||state!==mediaState)return;
+ try{var response=await api('/adminMedia/list?q='+encodeURIComponent(state.q)+'&offset='+state.offset,null,document.querySelector('.media-library-scroll'));if(request!==mediaRequest||state!==mediaState)return;
  response.items.forEach(function(r){state.selected.set(String(r.id),r);if(accepts(r,state.accept)||state.library)grid.append(mediaCard(r,false));});state.offset+=response.items.length;document.getElementById('media-more').hidden=!response.hasMore;
  if(!grid.children.length){var empty=document.createElement('p');empty.className='media-empty';empty.textContent='رسانه‌ای پیدا نشد. فایل جدید آپلود کنید.';grid.append(empty);}updateCount();
  }catch(e){ShopUI.toast(e.message,'error');}finally{grid.removeAttribute('aria-busy');}
@@ -107,7 +120,7 @@ async function loadMedia(reset){
 async function uploadFiles(files){
  if(!mediaState)return;var list=Array.from(files),feedback=document.getElementById('media-feedback'),state=mediaState;var count=0;
  for(var file of list){if(file.size>10*1024*1024){ShopUI.toast(file.name+': بیش از ۱۰ مگابایت','error');continue;}feedback.textContent='آپلود '+file.name+' ('+(++count)+' از '+list.length+')';
- try{var form=new FormData();form.append('file',file);var result=await api('/adminMedia/upload',form);var row=result.item;if(state===mediaState&&accepts(row,state.accept)){state.selected.set(String(row.id),row);if(state.multiple&&state.ids.length<20)state.ids.push(String(row.id));else if(!state.multiple)state.ids=[String(row.id)];}}catch(e){ShopUI.toast(file.name+': '+e.message,'error');}}
+ try{var form=new FormData();form.append('file',file);var result=await api('/adminMedia/upload',form,document.getElementById('media-drop'));var row=result.item;if(state===mediaState&&accepts(row,state.accept)){state.selected.set(String(row.id),row);if(state.multiple&&state.ids.length<20)state.ids.push(String(row.id));else if(!state.multiple)state.ids=[String(row.id)];}}catch(e){ShopUI.toast(file.name+': '+e.message,'error');}}
  feedback.textContent='آپلودها پردازش شدند.';if(state===mediaState)loadMedia(true);loadOverview();
 }
 function loadOverview(){var target=document.getElementById('library-overview');if(!target)return;api('/adminMedia/list').then(function(r){target.replaceChildren();r.items.forEach(function(row){target.append(mediaCard(row,true));});}).catch(function(e){ShopUI.toast(e.message,'error');});}
