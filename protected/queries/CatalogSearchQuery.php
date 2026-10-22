@@ -55,6 +55,12 @@ class CatalogSearchQuery
 
     private static function facetOptions($categoryIds)
     {
+        sort($categoryIds);
+        return SiteCache::read(array('product-facets',$categoryIds), array('products','product_attributes'), function () use ($categoryIds) { return self::loadFacetOptions($categoryIds); });
+    }
+
+    private static function loadFacetOptions($categoryIds)
+    {
         $criteria = new CDbCriteria;
         $criteria->condition = "p.status='published'";
         if ($categoryIds) {

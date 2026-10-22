@@ -1,0 +1,2 @@
+<div class="admin-page-head"><h1>کاتالوگ‌های شرکت</h1><div><?= CHtml::link('نمایش صفحه عمومی',array('catalog/index'),array('class'=>'btn btn-outline','data-no-pjax'=>'1')) ?> <?= CHtml::link('+ افزودن کاتالوگ',array('adminCatalog/create'),array('class'=>'btn btn-primary','data-pjax'=>'1')) ?></div></div>
+<section class="panel"><?php $this->widget('AdminTable',array('type'=>'company-catalogs')); ?></section>

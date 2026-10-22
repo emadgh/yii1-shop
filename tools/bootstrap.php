@@ -3,6 +3,6 @@ if (PHP_SAPI !== 'cli') { http_response_code(403); exit; }
 require_once dirname(__DIR__).'/vendor/yiisoft/yii/framework/yii.php';
 $config=require dirname(__DIR__).'/protected/config/main.php';
 unset($config['defaultController']);
-$config['components']=array('db'=>$config['components']['db']);
+$config['components']=array('db'=>$config['components']['db'],'siteCache'=>$config['components']['siteCache']);
 Yii::createConsoleApplication($config);
 Yii::app()->db->active=true;

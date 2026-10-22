@@ -1,6 +1,6 @@
 <?php
 class Hierarchy {
- public static function rows($table){if(!in_array($table,array('categories','menu_items'),true))throw new Exception('Invalid hierarchy');return Yii::app()->db->createCommand("SELECT * FROM $table ORDER BY sort_order,id")->queryAll();}
+ public static function rows($table){if(!in_array($table,array('categories','menu_items'),true))throw new Exception('Invalid hierarchy');return SiteCache::read(array("hierarchy",$table),array($table),function()use($table){return Yii::app()->db->createCommand("SELECT * FROM $table ORDER BY sort_order,id")->queryAll();});}
  public static function descendants($rows,$id){$out=array((int)$id);for($i=0;$i<count($out);$i++)foreach($rows as $row)if((int)$row['parent_id']===$out[$i] && !in_array((int)$row['id'],$out,true))$out[]=(int)$row['id'];return $out;}
  public static function flatten($rows,$parent=null,$depth=0,$seen=array()){
   $out=array();if($depth>40)return $out;

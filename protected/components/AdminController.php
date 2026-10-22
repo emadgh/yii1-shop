@@ -4,7 +4,7 @@ class AdminController extends AppController
     public $layout='//layouts/admin';
     protected function beforeAction($action){
       $user=AccessService::current();if($user&&!in_array($user->role,array('admin','superadmin'),true)){
-        $allowed=array('content'=>array('adminDashboard','adminPost','adminMedia','adminTag','adminCategory','adminCollection','adminMenu','adminSecurity'),'sales'=>array('adminDashboard','adminOrder','adminSecurity'),'warehouse'=>array('adminDashboard','adminReport','adminSecurity'));
+        $allowed=array('content'=>array('adminDashboard','adminPost','adminMedia','adminTag','adminCategory','adminCollection','adminCatalog','adminMenu','adminSecurity'),'sales'=>array('adminDashboard','adminOrder','adminSecurity'),'warehouse'=>array('adminDashboard','adminReport','adminSecurity'));
         if(!in_array($this->id,$allowed[$user->role]??array(),true))throw new CHttpException(403,'برای این بخش دسترسی ندارید.');
         if($this->id==='adminDashboard'){$this->redirect(array($user->role==='content'?'adminPost/index':($user->role==='sales'?'adminOrder/index':'adminReport/index')));return false;}
       }return parent::beforeAction($action);

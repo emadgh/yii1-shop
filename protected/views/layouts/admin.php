@@ -30,6 +30,7 @@ $cs->registerScriptFile(Yii::app()->baseUrl.'/assets/js/pjax.js',CClientScript::
   <?= $adminLink('◫ دسته‌بندی‌ها',array('adminCategory/index'),array('data-pjax'=>'1')) ?>
   <?= $adminLink('⌗ تگ‌ها',array('adminTag/index'),array('data-pjax'=>'1')) ?>
   <div class="side-section">محتوا و فروش</div>
+  <?= $adminLink('▥ کاتالوگ‌های شرکت',array('adminCatalog/index'),array('data-pjax'=>'1')) ?>
   <?= $adminLink('▤ بلاگ',array('adminPost/index'),array('data-pjax'=>'1')) ?>
   <?= $adminLink('◉ سفارش‌ها',array('adminOrder/index'),array('data-pjax'=>'1')) ?>
   <?= $adminLink('◇ کدهای تخفیف',array('adminCoupon/index'),array('data-pjax'=>'1')) ?>

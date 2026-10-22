@@ -1,0 +1,10 @@
+<div class="admin-page-head"><h1>ویرایش کاتالوگ</h1><?= CHtml::link('بازگشت',array('adminCatalog/index'),array('class'=>'btn btn-outline','data-pjax'=>'1')) ?></div>
+<?php if($error): ?><div class="flash flash-error"><?= CHtml::encode($error) ?></div><?php endif; ?>
+<?php $form=$this->beginWidget('CActiveForm'); ?><?= $form->errorSummary($model) ?>
+<section class="panel"><div class="form-row"><div class="field"><?= $form->labelEx($model,'title') ?><?= $form->textField($model,'title',array('maxlength'=>180,'required'=>true)) ?></div><div class="field"><?= $form->labelEx($model,'sort_order') ?><?= $form->numberField($model,'sort_order',array('min'=>0,'max'=>99999)) ?></div></div>
+<div class="field"><?= $form->labelEx($model,'description') ?><?= $form->textArea($model,'description',array('class'=>'markdown-editor','rows'=>6,'data-upload-scope'=>'catalogs')) ?></div>
+<div class="check-field"><?= $form->checkBox($model,'is_active') ?><?= $form->label($model,'is_active') ?></div></section>
+<section class="panel"><h2>تصویر کاتالوگ</h2><?php $this->widget('MediaPicker',array('name'=>'image_id','value'=>$model->image_id?array($model->image_id):array(),'multiple'=>false,'accept'=>'image/*','scope'=>'catalogs','label'=>'انتخاب تصویر')); ?></section>
+<section class="panel"><h2>فایل PDF *</h2><?php $this->widget('MediaPicker',array('name'=>'pdf_id','value'=>$model->pdf_id?array($model->pdf_id):array(),'multiple'=>false,'accept'=>'application/pdf','scope'=>'catalogs','label'=>'انتخاب PDF')); ?><p class="muted">از فایل‌های سایت انتخاب کنید یا در بخش «آپلودهای کاتالوگ» فایل جدید بارگذاری کنید.</p></section>
+<?= CHtml::submitButton('ذخیره کاتالوگ',array('class'=>'btn btn-primary')) ?><?php $this->endWidget(); ?>
+<?php if(!$model->isNewRecord): ?><?= CHtml::beginForm(array('adminCatalog/delete','id'=>$model->id),'post',array('data-confirm'=>'کاتالوگ حذف شود؟ فایل‌های رسانه در کتابخانه باقی می‌مانند.')) ?><?= CHtml::submitButton('حذف کاتالوگ',array('class'=>'btn btn-danger')) ?><?= CHtml::endForm() ?><?php endif; ?>

@@ -2,13 +2,16 @@
 /** Validates files, builds variants and cleans them up if metadata persistence fails. */
 class MediaUploadService
 {
-    public static function ingest($temporaryFile, $name)
+    public static function ingest($temporaryFile, $name, $scope='general', $accept='*')
     {
+        if (!in_array($scope, array('general','catalogs'), true) || !is_string($accept)) throw new Exception('بخش آپلود معتبر نیست.');
         $size = filesize($temporaryFile);
         if (!$size || $size > 10 * 1024 * 1024) {
             throw new Exception('حداکثر حجم فایل ۱۰ مگابایت است.');
         }
         $mime = mime_content_type($temporaryFile);
+        $accepted=explode(',', $accept);
+        if ($accept!=='*' && !in_array($mime,$accepted,true) && !(in_array('image/*',$accepted,true) && strpos($mime,'image/')===0)) throw new Exception('فرمت فایل برای این فیلد مجاز نیست.');
         $token = bin2hex(random_bytes(16));
         $directory = Yii::app()->params['uploadsDir'].'/media';
         if (!is_dir($directory) && !mkdir($directory, 0755, true)) {
@@ -70,7 +73,7 @@ class MediaUploadService
         try {
             return MediaRepository::insert(array('filename' => $filename,
                 'original_name' => mb_substr(basename($name), 0, 240), 'mime' => $mime,
-                'size' => $size, 'width' => $width, 'height' => $height,
+                'size' => $size, 'width' => $width, 'height' => $height, 'upload_scope'=>$scope,
                 'variants' => CJSON::encode($variants), 'created_at' => date('Y-m-d H:i:s')));
         } catch (Exception $exception) {
             self::removeFiles($filename, $variants);

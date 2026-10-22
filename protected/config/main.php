@@ -11,6 +11,7 @@ $config=array(
   'defaultController'=>'site',
   'import'=>array('application.models.*','application.components.*','application.repositories.*','application.queries.*','application.services.*','application.forms.*','application.widgets.*'),
   'components'=>array(
+    'siteCache'=>array('class'=>'application.components.SiteCache'),
     'db'=>array(
       'connectionString'=>$dsn,
       'username'=>getenv('SHOP_DB_USER') ?: '',
@@ -32,6 +33,7 @@ $config=array(
          'product/<slug:[a-z0-9-]+>'=>'shop/view',
          'category/<slug:[a-z0-9-]+>'=>'shop/category',
          'blog'=>'blog/index',
+         'catalogs'=>'catalog/index',
          'blog/<slug:[a-z0-9-]+>'=>'blog/view',
          'cart'=>'cart/index',
          'checkout'=>'cart/checkout',

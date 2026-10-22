@@ -10,6 +10,11 @@ class AdminSettingsController extends AdminController {
    if($values['matomo_site_id'] && (!ctype_digit($values['matomo_site_id']) || (int)$values['matomo_site_id']<1))throw new Exception('شناسه سایت Matomo معتبر نیست.');
    if(($values['matomo_url']==='')!==($values['matomo_site_id']===''))throw new Exception('آدرس Matomo و شناسه سایت را با هم وارد کنید.');
    if(AccessService::isSuperAdmin()){
+    $values['cache_backend']=Yii::app()->request->getPost('cache_backend',ShopSettings::get('cache_backend','db'));
+    if(!in_array($values['cache_backend'],array('db','file','off'),true))throw new Exception('نوع کش معتبر نیست.');
+    $ttl=Yii::app()->request->getPost('cache_ttl',ShopSettings::get('cache_ttl','600'));
+    if(!is_string($ttl)||!ctype_digit($ttl)||(int)$ttl<30||(int)$ttl>86400)throw new Exception('مدت کش باید بین ۳۰ و ۸۶۴۰۰ ثانیه باشد.');
+    $values['cache_ttl']=$ttl;
     foreach(array('zarinpal_merchant','public_url') as $key){$raw=Yii::app()->request->getPost($key,'');if(!is_string($raw))throw new Exception('تنظیم درگاه معتبر نیست.');$values[$key]=trim($raw);}
     if($values['zarinpal_merchant']&&!preg_match('/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/iD',$values['zarinpal_merchant']))throw new Exception('Merchant ID معتبر نیست.');
     $values['zarinpal_mode']=Yii::app()->request->getPost('zarinpal_mode','sandbox')==='live'?'live':'sandbox';$values['zarinpal_enabled']=Yii::app()->request->getPost('zarinpal_enabled')==='1'?'1':'0';
@@ -23,5 +28,9 @@ class AdminSettingsController extends AdminController {
    $tx=Yii::app()->db->beginTransaction();try{foreach($values as $key=>$value)ShopSettings::set($key,$value);$tx->commit();}catch(Exception $e){$tx->rollback();throw $e;}$this->flash('تنظیمات ذخیره شد.');$this->refresh();
   }catch(Exception $e){$error=$e->getMessage();}}
   $this->pageTitle='تنظیمات وبسایت';$this->render('//admin/settings/index',array('error'=>$error));
+ }
+ public function actionClearCache(){
+  $this->requirePost();if(!AccessService::isSuperAdmin())throw new CHttpException(403);
+  Yii::app()->siteCache->invalidateAll();$this->flash('کش تمام بخش‌ها باطل شد؛ در درخواست بعدی بازسازی می‌شود.');$this->redirect(array('adminSettings/index'));
  }
 }
