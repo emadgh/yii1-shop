@@ -1,0 +1,5 @@
+<div class="admin-page-head"><div><span class="eyebrow">کاتالوگ و بلاگ</span><h1><?= $model->isNewRecord?'تگ جدید':'ویرایش تگ' ?></h1></div><?= CHtml::link('بازگشت',array('adminTag/index'),array('class'=>'btn btn-outline','data-pjax'=>'1')) ?></div>
+<section class="panel narrow-panel"><?php $form=$this->beginWidget('CActiveForm',array('id'=>'tag-form')); ?><?= $form->errorSummary($model) ?>
+<div class="field"><label>نام تگ</label><?= $form->textField($model,'name') ?></div><div class="field"><label>Slug انگلیسی (اختیاری)</label><?= $form->textField($model,'slug',array('dir'=>'ltr')) ?></div>
+<?= CHtml::submitButton('ذخیره',array('class'=>'btn btn-primary')) ?><?php $this->endWidget(); ?></section>
+<?php if(!$model->isNewRecord): ?><div class="narrow-panel danger-zone panel"><?= CHtml::beginForm(array('adminTag/delete','id'=>$model->id),'post',array('data-confirm'=>'تگ حذف شود؟')) ?><?= CHtml::submitButton('حذف تگ',array('class'=>'btn btn-danger')) ?><?= CHtml::endForm() ?></div><?php endif; ?>

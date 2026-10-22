@@ -1,0 +1,9 @@
+{
+  "name": "yii1-shop-browser-tests",
+  "private": true,
+  "scripts": {
+    "test:browser": "node tools/verify-cms-browser.cjs --all",
+    "test:race": "node tools/verify-race.cjs"
+  },
+  "devDependencies": {"playwright": "1.62.1"}
+}

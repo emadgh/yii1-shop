@@ -1,0 +1,31 @@
+name: Verify shop
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  sqlite:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_sqlite, mbstring, fileinfo, gd
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: composer install --no-interaction --prefer-dist
+      - name: Install disposable demo
+        env:
+          SHOP_ADMIN_EMAIL: demo@bazaarche.test
+          SHOP_ADMIN_PASSWORD: BazaarcheTest123!
+        run: |
+          php tools/install.php
+          php tools/seed.php
+      - run: find protected tools public -name '*.php' -not -path '*/runtime/*' -print0 | xargs -0 -n1 php -l
+      - run: php tools/verify-commerce.php && php tools/verify-cms.php
+      - run: npm ci && npx playwright install --with-deps chromium
+      - run: npm run test:race
+      - run: npm run test:browser

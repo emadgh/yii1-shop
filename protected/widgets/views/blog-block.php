@@ -1,0 +1,1 @@
+<section class="cms-blog"><div class="section-heading"><h2><?= CHtml::encode($title) ?></h2><?= CHtml::link('همه نوشته‌ها ←',array('blog/index'),array('class'=>'text-link','data-pjax'=>'1')) ?></div><div class="blog-grid"><?php foreach($posts as $post) $this->controller->renderPartial('//blog/_card',array('post'=>$post)); ?></div></section>

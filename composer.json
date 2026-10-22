@@ -1,0 +1,15 @@
+{
+  "name": "demo/yii1-store",
+  "description": "RTL storefront and admin dashboard on Yii 1.1",
+  "type": "project",
+  "license": "MIT",
+  "require": {
+    "php": "^7.4 || ^8.0",
+    "ext-pdo": "*",
+    "ext-mbstring": "*",
+    "ext-fileinfo": "*",
+    "ext-gd": "*",
+    "yiisoft/yii": "1.1.32"
+  },
+  "config": { "sort-packages": true }
+}

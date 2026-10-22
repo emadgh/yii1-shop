@@ -1,0 +1,38 @@
+[
+  {
+    "key": "hero-market",
+    "prompt": "Photorealistic premium online home goods store promotional banner photograph. Wide landscape composition, 1800x800 feel. Three dimensional real objects on a gentle blush pink seamless tabletop and pale pink background: elegant matte ceramic vase with small olive branch, warm ivory minimalist desk lamp, speckled ceramic coffee mug, walnut wooden tray, slim black wall clock propped at back. Objects clustered on center-left and middle with generous empty pale blush space on the right for RTL Persian HTML copy. Refined ecommerce product campaign photography, crisp studio light with natural soft shadows, clean subtle red plinth geometries only. No letters, no text, no logo, no UI, no watermark. High fidelity materials, believable product scale."
+  },
+  {
+    "key": "hero-editorial-light",
+    "prompt": "Photorealistic minimalist design shop editorial still life, landscape 3:2. Ivory textured ceramic vase with an olive branch, sculptural black reading lamp and folded oatmeal linen on a warm pale travertine console. Warm ivory plaster wall, softly directional daylight, fine leaf shadows, quiet architectural composition, close detail of ceramic and stone. A little asymmetry. High-end magazine photography for a Persian home goods storefront. No people, no text, no logos, no interface, no watermark."
+  },
+  {
+    "key": "hero-editorial-dark",
+    "prompt": "Photorealistic high end dark design gallery shop still life, landscape 3:2. A sculptural matte ivory ceramic vase with dried slender foliage on the left, a small dark walnut wooden tray in center foreground, a brushed bronze desk lamp at right casting a warm controlled pool of light on charcoal travertine. Very dark warm architectural plaster background. Elegant cinematic contrast, tactile realistic ceramics wood and metal, objects easily legible with soft rim light. Boutique home goods campaign. No text, no letters, no logos, no interface, no watermark."
+  },
+  {
+    "key": "product-lamp",
+    "prompt": "Photorealistic ecommerce product photograph of one minimalist modern warm ivory desk lamp with simple domed shade, slim angled stem and round base, positioned in three quarter view, whole object fully visible, centered, pure white seamless background with a light natural contact shadow, studio softbox lighting, premium detailed materials, square composition 1200x1200. No text, no label, no watermark, no other objects."
+  },
+  {
+    "key": "product-vase",
+    "prompt": "Photorealistic ecommerce product photograph of one tall ivory matte ceramic decorative vase with subtle vertical sculptural ribs and narrow neck. Whole vase visible, centered three quarter view, white seamless studio backdrop and very faint natural contact shadow, warm high end product photography, square 1200x1200 composition. No plants, no text, no label, no watermark, no other objects."
+  },
+  {
+    "key": "product-wood",
+    "prompt": "Photorealistic ecommerce product photograph of a set of three hand finished walnut wooden bowls and serving tray, organically nested together with visible rich natural wood grain. Whole set visible, centered, white seamless background, soft natural contact shadows, warm museum quality homewares product photography, square 1200x1200. No text, no logo, no watermark, no other props."
+  },
+  {
+    "key": "product-clock",
+    "prompt": "Photorealistic ecommerce product photograph of a single minimalist round wall clock, thin matte charcoal frame, warm off white dial, slender black hands, simple black index marks without numerals or letters. Clock leaning very slightly on white seamless background, whole clock visible, three quarter angle, delicate contact shadow, premium studio lighting, square 1200x1200. No text, no logo, no watermark, no other objects."
+  },
+  {
+    "key": "product-mug",
+    "prompt": "Photorealistic ecommerce product photograph of a single handmade warm speckled cream ceramic coffee mug with a rounded comfortable handle and espresso inside, whole mug visible, three quarter view, centered on pure white seamless backdrop with gentle contact shadow, fine detailed glaze, refined studio lighting, square 1200x1200. No text, no label, no watermark, no props."
+  },
+  {
+    "key": "product-box",
+    "prompt": "Photorealistic ecommerce product photograph of one elegant rectangular walnut wood storage box with matching fitted lid slightly open, minimalist design with beautifully visible natural grain and fine joinery, whole box visible, centered on white seamless background and gentle contact shadow, three quarter view, premium natural studio light, square 1200x1200. No text, no label, no watermark, no other objects."
+  }
+]

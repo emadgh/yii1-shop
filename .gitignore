@@ -1,0 +1,16 @@
+/vendor/
+/protected/config/local.php
+/protected/runtime/*
+!/protected/runtime/.gitkeep
+/public/uploads/products/*
+/public/uploads/blog/*
+/public/uploads/media/*
+!/public/uploads/products/.gitkeep
+!/public/uploads/blog/.gitkeep
+!/public/uploads/media/.gitkeep
+.DS_Store
+/node_modules/
+/public/assets/[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]/
+.env
+.env.*
+!.env.example

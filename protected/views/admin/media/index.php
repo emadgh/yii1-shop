@@ -1,0 +1,2 @@
+<div class="admin-page-head"><div><span class="eyebrow">فایل‌ها و تصاویر</span><h1>کتابخانه رسانه</h1><p>تمام فایل‌های آپلودشده، مشترک بین محصولات و مجله</p></div></div>
+<section class="panel"><h2>مدیریت فایل‌ها</h2><p class="muted">آپلود با کشیدن و رهاکردن، جستجو، پیش‌نمایش و حذف فایل‌های بدون استفاده. تصاویر با سه اندازه WebP نگهداری می‌شوند.</p><button type="button" class="btn btn-primary" data-library-open>بازکردن کتابخانه رسانه</button><div id="library-overview" class="media-grid media-overview"></div></section>

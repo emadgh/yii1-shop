@@ -1,0 +1,3 @@
+<div class="pair-editor" data-name="<?= CHtml::encode($name) ?>"><div class="pair-head"><span>نام / کلید</span><span>مقدار</span><span></span></div><div class="pair-rows">
+<?php foreach($rows as $i=>$row): ?><div class="pair-row"><input aria-label="نام مشخصه" name="<?= CHtml::encode($name) ?>[<?= $i ?>][key]" maxlength="100" value="<?= CHtml::encode(isset($row['key'])?$row['key']:'') ?>"><input aria-label="مقدار مشخصه" name="<?= CHtml::encode($name) ?>[<?= $i ?>][value]" maxlength="2000" value="<?= CHtml::encode(isset($row['value'])?$row['value']:'') ?>"><button type="button" class="icon-button" data-remove-pair aria-label="حذف ردیف">×</button></div><?php endforeach; ?>
+</div><button type="button" class="btn btn-outline btn-sm" data-add-pair>+ افزودن ردیف</button></div>

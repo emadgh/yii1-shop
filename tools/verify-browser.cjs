@@ -1,0 +1,91 @@
+const {chromium,launchOptions}=require('./test-runtime.cjs');
+const assert=require('node:assert/strict');
+const path=require('node:path');
+(async()=>{
+ const browser=await chromium.launch(launchOptions);
+ const page=await browser.newPage({viewport:{width:1440,height:1000}});
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ page.on('response',r=>{if(r.status()>=400&&r.status()!==422)console.error('HTTP ERROR',r.status(),r.url())});
+ page.on('console',m=>{if(m.type()==='error' && !m.text().includes('422'))errors.push(m.text())});
+ async function go(route){const r=await page.goto((process.env.SHOP_TEST_BASE||'http://127.0.0.1:8080')+route);assert.equal(r.status(),200,route);await page.waitForLoadState('networkidle');}
+ async function api(route,data){return page.evaluate(async({route,data})=>{const f=new FormData();Object.entries(data||{}).forEach(([k,v])=>f.append(k,v));f.append(document.querySelector('meta[name="csrf-name"]').content,document.querySelector('meta[name="csrf-token"]').content);const r=await fetch(route,{method:'POST',body:f});return {status:r.status,json:await r.json()};},{route,data});}
+ try{
+  await go('/');await page.screenshot({path:'protected/runtime/store-desktop.png',fullPage:true});
+  assert.equal(await page.evaluate(()=>document.fonts.check('14px Vazir')),true);
+  assert.equal(await page.locator('.product-card img').count(),6);
+  console.log('PASS storefront local font, responsive images and render');
+  await page.setViewportSize({width:390,height:844});await page.screenshot({path:'protected/runtime/store-mobile.png',fullPage:true});
+  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'store mobile overflow');
+  await page.setViewportSize({width:1440,height:1000});
+  await go('/login');await page.locator('#email').fill(process.env.SHOP_TEST_EMAIL||'demo@bazaarche.test');await page.locator('#password').fill(process.env.SHOP_TEST_PASSWORD||'BazaarcheTest123!');await page.getByRole('button',{name:'ورود به داشبورد',exact:true}).click();await page.waitForURL('**/admin');
+  await go('/adminProduct/update?id=1');
+  await page.screenshot({path:'protected/runtime/product-editor.png',fullPage:true});
+  await page.locator('[data-open-media]').click();await page.locator('#media-grid .media-tile-select').first().waitFor();
+  await page.waitForFunction(()=>[...document.querySelectorAll('#media-grid img')].every(img=>img.complete&&img.naturalWidth>0));await page.screenshot({path:'protected/runtime/media-dialog.png'});
+  assert(await page.locator('#media-grid .media-tile-select').count()>=9);
+  await page.locator('[data-close-media]').first().click();
+  await page.locator('.preview-toggle').first().click();await page.locator('.markdown-preview').first().waitFor({state:'visible'});
+  console.log('PASS media dialog, preselected images and Markdown preview');
+  await go('/adminCoupon/create');await page.locator('[name="Coupon[code]"]').waitFor();
+  for(const route of ['/adminSettings/index','/adminCoupon/index','/adminMedia/index','/adminReport/index','/adminOrder/index'])await go(route);
+  await page.screenshot({path:'protected/runtime/admin-orders.png',fullPage:true});
+  await page.setViewportSize({width:390,height:844});await go('/adminProduct/update?id=1');await page.screenshot({path:'protected/runtime/admin-mobile.png',fullPage:true});
+  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'admin mobile overflow');
+  await page.setViewportSize({width:1440,height:1000});
+  await go('/adminProduct/create');
+  const title='محصول تست مرورگر '+Date.now();
+  await page.locator('#Product_title').fill(title);await page.locator('#Product_sku').fill('TEST-'+Date.now());await page.locator('[name="Product[price]"]').fill('1234567');
+  assert.equal(await page.locator('[name="Product[price]"]').inputValue(),'1,234,567');
+  await page.locator('#Product_stock').fill('3');await page.locator('#Product_status').selectOption('published');await page.locator('#Product_summary').fill('**خلاصه تست**');await page.locator('#Product_description').fill('## عنوان تست\n\nمتن **پررنگ**');
+  await page.locator('[data-add-pair]').first().click();await page.locator('.pair-row input').nth(0).fill('ویژگی تست');await page.locator('.pair-row input').nth(1).fill('مقدار قابل جستجو');
+  await page.locator('.tag-field>input').fill('تگ آزمایشی');await page.locator('.tag-field>input').press('Enter');
+  await page.locator('[data-open-media]').click();await page.locator('#media-grid .media-tile-select').first().waitFor();await page.locator('#media-grid .media-tile-select').nth(0).click();await page.locator('#media-grid .media-tile-select').nth(1).click();await page.locator('#media-apply').click();
+  assert.equal(await page.locator('.media-selection .selected-media').count(),2);
+  await page.getByRole('button',{name:'ذخیره محصول',exact:true}).click();await page.waitForURL('**/adminProduct/index');
+  const row=page.locator('tr').filter({hasText:title});assert.equal(await row.count(),1);const href=await row.getByRole('link',{name:'ویرایش ←'}).getAttribute('href');const id=new URL(href,'http://127.0.0.1:8080').searchParams.get('id');
+  await go('/shop?q='+encodeURIComponent('مقدار قابل جستجو'));assert.equal(await page.locator('.product-card').count(),1);
+  await page.locator('.product-card h3 a').click();await page.locator('.rich-content h2').waitFor();assert.equal(await page.locator('.product-summary strong').textContent(),'خلاصه تست');
+  await go(href);await page.getByRole('button',{name:'حذف محصول',exact:true}).click();await page.locator('#message-dialog[open]').waitFor();await page.locator('#message-dialog button[value=cancel]').click();assert.equal(await page.locator('#Product_title').inputValue(),title);
+  await page.getByRole('button',{name:'حذف محصول',exact:true}).click();await page.locator('#message-dialog button[value=ok]').click();await page.waitForURL('**/adminProduct/index');
+  console.log('PASS product save, money input, tags, pair table, media selection, metadata search, Markdown and custom confirmation');
+  await go('/adminProduct/update?id=1');await page.locator('[data-open-media]').click();await page.locator('#media-grid .media-tile-select').first().waitFor();
+  const upload=page.waitForResponse(r=>r.url().includes('/adminMedia/upload')&&r.request().method()==='POST');
+  await page.locator('#media-upload').setInputFiles('public/assets/storefront/product-lamp.webp');const uploadResponse=await upload;assert.equal(uploadResponse.status(),200);const uploadResult=await uploadResponse.json();assert.equal(Object.keys(uploadResult.item.variants).length,3);await page.locator('[data-close-media]').first().click();
+  const deleted=await api('/adminMedia/delete?id='+uploadResult.item.id,{});assert.equal(deleted.status,200);
+  const referencedId=(await page.locator('[name=media_ids]').inputValue()).split(',')[0];const referenced=await api('/adminMedia/delete?id='+referencedId,{});assert.equal(referenced.status,422);
+  console.log('PASS AJAX image upload creates WebP variants; referenced media deletion protected');
+  await go('/adminReport/index');await page.screenshot({path:'protected/runtime/finance-inventory.png',fullPage:true});
+
+  await go('/adminPost/create');const postTitle='مقاله تست مرورگر '+Date.now();
+  await page.locator('#Post_title').fill(postTitle);await page.locator('#Post_excerpt').fill('**خلاصه مجله**');await page.locator('#Post_body').fill('## عنوان مقاله\n\nیک متن **پررنگ**');await page.locator('#Post_status').selectOption('published');
+  await page.locator('[data-open-media]').click();await page.locator('#media-grid .media-tile-select').first().waitFor();await page.locator('#media-grid .media-tile-select').nth(0).click();await page.locator('#media-grid .media-tile-select').nth(1).click();
+  assert.equal(await page.locator('#media-grid [aria-pressed=true]').count(),1);await page.locator('#media-apply').click();assert.equal(await page.locator('.media-selection .selected-media').count(),1);
+  await page.locator('.tag-field>input').fill('تست مجله');await page.locator('.tag-field>input').press('Enter');
+  await page.getByRole('button',{name:'ذخیره نوشته',exact:true}).click();await page.waitForURL('**/adminPost/index');
+  const postRow=page.locator('tr').filter({hasText:postTitle});const postEdit=await postRow.locator('a').last().getAttribute('href');
+  await go('/blog');await page.locator('.post-body h3 a').filter({hasText:postTitle}).click();assert.equal(await page.locator('.article-text h2').textContent(),'عنوان مقاله');assert.equal(await page.locator('.article-subtitle strong').textContent(),'خلاصه مجله');
+  await go(postEdit);await page.getByRole('button',{name:'حذف نوشته',exact:true}).click();await page.locator('#message-dialog button[value=ok]').click();await page.waitForURL('**/adminPost/index');
+  console.log('PASS blog save, single media selector, tags, rendered Markdown and delete');
+  await go('/adminSettings/index');const previousName=await page.locator('#site_name').inputValue(),previousDescription=await page.locator('#site_description').inputValue(),previousMinutes=await page.locator('#reservation_minutes').inputValue();
+  await page.locator('#currency').selectOption('rial');await page.getByRole('button',{name:'ذخیره تنظیمات',exact:true}).click();await page.waitForLoadState('networkidle');
+  await go('/product/minimal-desk-lamp');assert((await page.locator('.detail-price').textContent()).includes('14,280,000 ریال'));
+  await go('/adminSettings/index');await page.locator('#currency').selectOption('toman');await page.getByRole('button',{name:'ذخیره تنظیمات',exact:true}).click();await page.waitForLoadState('networkidle');
+  console.log('PASS settings save and real storefront currency conversion');
+  await go('/product/minimal-desk-lamp');await page.getByRole('button',{name:'افزودن به سبد خرید',exact:true}).click();await page.waitForURL('**/cart');
+  await page.getByRole('link',{name:'ادامه و ثبت سفارش ←',exact:true}).click();await page.locator('#CheckoutForm_customer_name').fill('تست جریان خرید');await page.locator('#CheckoutForm_customer_email').fill('browser@example.test');await page.locator('#CheckoutForm_customer_phone').fill('09123456789');await page.locator('#CheckoutForm_shipping_address').fill('تهران، نشانی تست مرورگر');await page.locator('#CheckoutForm_notes').fill('BROWSER-VERIFY');
+  await page.locator('#coupon').fill('WELCOME10');await page.locator('[data-apply-coupon]').click();await page.waitForFunction(()=>document.getElementById('coupon-feedback').textContent.includes('قابل پرداخت'));
+  await page.getByRole('button',{name:'ثبت سفارش و رزرو کالا',exact:true}).click();await page.waitForURL('**/cart/success*');const orderNumber=await page.locator('.success-screen>strong').textContent();assert.equal(await page.locator('.reservation-notice').count(),1);
+  await go('/adminOrder/index');const orderRow=page.locator('tr').filter({hasText:orderNumber.trim()});await orderRow.getByRole('link',{name:'جزئیات ←'}).click();await page.locator('[name=status]').selectOption('cancelled');await page.getByRole('button',{name:'ثبت وضعیت',exact:true}).click();await page.locator('#message-dialog button[value=ok]').click();await page.waitForLoadState('networkidle');await page.locator('.status-cancelled').waitFor();
+  console.log('PASS checkout with coupon, reservation confirmation, admin cancellation');
+  await go('/adminMedia/index');await page.locator('[data-library-open]').click();await page.locator('#media-grid .media-tile-select').first().waitFor();
+  const dropUpload=page.waitForResponse(r=>r.url().includes('/adminMedia/upload')&&r.request().method()==='POST');
+  await page.evaluate(async()=>{const img=document.querySelector('#media-grid img');const blob=await(await fetch(img.src)).blob();const transfer=new DataTransfer();transfer.items.add(new File([blob],'drop-test.webp',{type:'image/webp'}));document.getElementById('media-drop').dispatchEvent(new DragEvent('drop',{bubbles:true,cancelable:true,dataTransfer:transfer}));});
+  const dropped=await(await dropUpload).json();assert(dropped.ok);await page.waitForLoadState('networkidle');const dropTile=page.locator('#media-grid .media-tile').filter({hasText:'drop-test.webp'});await dropTile.locator('.media-delete').click();await page.locator('#message-dialog button[value=ok]').click();await dropTile.waitFor({state:'detached'});await page.locator('[data-close-media]').first().click();await page.waitForLoadState('networkidle');
+  console.log('PASS drag and drop upload through shared media library');
+  await page.route('**/adminReport/index',async route=>{await new Promise(r=>setTimeout(r,500));await route.continue();});await page.locator('.sidebar>a[href="/adminReport/index"]').click();await page.waitForFunction(()=>!document.getElementById('page-progress').hidden);await page.waitForFunction(()=>document.querySelector('#pjax-main h1')?.textContent==='مالی و انبار');await page.unroute('**/adminReport/index');
+  console.log('PASS visible top loading bar during PJAX navigation');
+
+
+  assert.equal(errors.length,0,errors.join('\n'));console.log('ALL BROWSER CHECKS PASSED');
+ }finally{await browser.close();}
+})().catch(e=>{console.error(e);process.exitCode=1;});
