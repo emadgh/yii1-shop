@@ -14,6 +14,6 @@ class Hierarchy {
  }
  public static function save($model,$revision=null){
   $table=$model->tableName();if(!in_array($table,array('categories','menu_items'),true))throw new Exception('Invalid hierarchy');$db=Yii::app()->db;$tx=$db->beginTransaction();
-  try{if($db->driverName==='mysql')$db->createCommand("SELECT id FROM $table ORDER BY id FOR UPDATE")->queryAll();else $db->createCommand("UPDATE $table SET sort_order=sort_order")->execute();if($table==='categories'&&$revision!==null&&(!is_string($revision)||!hash_equals(CategoryTreeService::revision(),$revision)))throw new CHttpException(409,'ساختار دسته‌ها تغییر کرده است؛ درخت را تازه کنید و دوباره ذخیره کنید.');$saved=$model->save();$tx->commit();return $saved;}catch(Exception $e){if($tx->active)$tx->rollback();throw $e;}
+  try{if($db->driverName==='mysql')$db->createCommand("SELECT id FROM $table ORDER BY id FOR UPDATE")->queryAll();else $db->createCommand("UPDATE $table SET sort_order=sort_order")->execute();if($revision!==null&&(!is_string($revision)||!hash_equals((new HierarchyTreeService($table,$table==='menu_items'?$model->location:null))->revision(),$revision)))throw new CHttpException(409,'ساختار درخت تغییر کرده است؛ درخت را تازه کنید و دوباره ذخیره کنید.');$saved=$model->save();$tx->commit();return $saved;}catch(Exception $e){if($tx->active)$tx->rollback();throw $e;}
  }
 }

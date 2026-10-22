@@ -1,6 +1,7 @@
 <?php
 class MenuItem extends CActiveRecord {
  public static function model($className=__CLASS__){return parent::model($className);}
+ public static function locations(){return array('header'=>'بالای سایت','footer'=>'پایین سایت');}
  public function tableName(){return 'menu_items';}
  public function rules(){return array(array('label,url,location','required'),array('label','length','max'=>150),array('url','length','max'=>500),array('url','checkUrl'),array('parent_id','checkParent'),array('parent_id,sort_order','numerical','integerOnly'=>true,'min'=>0,'allowEmpty'=>true),array('location','in','range'=>array('header','footer')),array('is_active','boolean'));}
  public function checkUrl(){if(!preg_match('~^/(?!/)[^\s<>"\x00-\x1f]*$|^https://[^\s<>"\x00-\x1f]+$~uD',$this->url) || strpos($this->url,'\\')!==false)$this->addError('url','فقط مسیر داخلی با / یا آدرس https مجاز است.');}

@@ -10,20 +10,36 @@ class SiteController extends AppController
        $this->render('index');
     }
     public function actionLogin() {
+      header('Cache-Control: no-store');
       if(!Yii::app()->user->isGuest) $this->redirect(array('adminDashboard/index'));
       $error='';
       if(Yii::app()->request->isPostRequest) {
-        $email=trim((string)Yii::app()->request->getPost('email',''));
-        $password=(string)Yii::app()->request->getPost('password','');
+        $email=Yii::app()->request->getPost('email','');$password=Yii::app()->request->getPost('password','');
+        if(!is_string($email)||!is_string($password))throw new CHttpException(400);$email=trim($email);
         LoginGuard::attempt($email);
         $identity=new StoreIdentity($email,$password);
-        $identity->otp=Yii::app()->request->getPost('otp','');if($identity->authenticate()) {
+        $result=$identity->beginLogin();
+        if($result==='challenge')$this->redirect(array('site/verify'));
+        if($result==='authenticated') {
           Yii::app()->user->login($identity,0);
           $this->redirect(array('adminDashboard/index'));
         }
         $error='ایمیل یا رمز عبور نادرست است.';
       }
       $this->pageTitle='ورود مدیریت'; $this->render('login',array('error'=>$error));
+    }
+    public function actionVerify(){
+      header('Cache-Control: no-store');header('Referrer-Policy: no-referrer');
+      if(!Yii::app()->user->isGuest)$this->redirect(array('adminDashboard/index'));
+      if(!StoreIdentity::challengeUser())$this->redirect(array('site/login'));
+      $error='';
+      if(Yii::app()->request->isPostRequest){
+        $identity=StoreIdentity::authenticateChallenge(Yii::app()->request->getPost('otp',''));
+        if($identity){Yii::app()->user->login($identity,0);$this->redirect(array('adminDashboard/index'));}
+        if(!StoreIdentity::challengeUser())$this->redirect(array('site/login'));
+        $error='کد معتبر نیست یا قبلاً استفاده شده است.';
+      }
+      $this->pageTitle='تأیید ورود دومرحله‌ای';$this->render('verify',array('error'=>$error));
     }
     public function actionLogout() {
       if(!Yii::app()->request->isPostRequest) throw new CHttpException(405);
