@@ -19,7 +19,6 @@ class JalaliDate {
   return CHtml::textField($name,$value,array_merge(array('data-jdp'=>'','data-jdp-only-date'=>$time?null:'','dir'=>'ltr','autocomplete'=>'off','placeholder'=>$time?'1405/01/01 12:00':'1405/01/01','data-jalali-date'=>$time?'datetime':'date'),$options));
  }
  public static function assets(){
-  $cs=Yii::app()->clientScript;$base=Yii::app()->baseUrl.'/assets/';$cs->registerCssFile($base.'vendor/jalalidatepicker/jalalidatepicker.min.css');$cs->registerCssFile($base.'css/jalali.css');
-  $cs->registerScriptFile($base.'vendor/jalalidatepicker/jalalidatepicker.min.js',CClientScript::POS_END);$cs->registerScriptFile($base.'js/jalali.js',CClientScript::POS_END);
+  Yii::app()->clientScript->registerScriptFile(Yii::app()->baseUrl.'/assets/js/jalali.js',CClientScript::POS_END);
  }
 }

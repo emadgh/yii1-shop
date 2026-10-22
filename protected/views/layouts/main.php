@@ -1,6 +1,5 @@
 <?php
 $cs=Yii::app()->clientScript;
-JalaliDate::assets();
 foreach(array('/assets/css/app.css','/assets/css/modern.css') as $file)$cs->registerCssFile(Yii::app()->baseUrl.$file);
 $themeKey=ThemeService::key();$theme=ThemeService::info();
 if($themeKey!=='classic'){ $cs->registerCssFile(Yii::app()->baseUrl.'/assets/themes/storefront.css');$cs->registerCssFile(Yii::app()->baseUrl.'/assets/themes/'.$themeKey.'.css'); }
