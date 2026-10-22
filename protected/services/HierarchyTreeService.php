@@ -4,7 +4,7 @@ class HierarchyTreeService {
  private $table,$location;
  public function __construct($table='categories',$location=null){if(!in_array($table,array('categories','menu_items'),true))throw new CHttpException(400);if($table==='menu_items'&&(!is_string($location)||!isset(MenuItem::locations()[$location])))throw new CHttpException(400,'محل منو معتبر نیست.');$this->table=$table;$this->location=$location;}
  public function rows(){ $rows=Hierarchy::rows($this->table);if($this->table==='menu_items'){$location=$this->location;$rows=array_values(array_filter($rows,function($row)use($location){return $row['location']===$location;}));}return $rows; }
- public function options($exclude=null){$rows=$this->rows();$skip=$exclude?Hierarchy::descendants($rows,$exclude):array();$options=array();foreach(Hierarchy::flatten($rows) as $row)if(!in_array((int)$row['id'],$skip,true))$options[$row['id']]=str_repeat('— ',$row['_depth']).($row['name']??$row['label']);return $options;}
+ public function options($exclude=null,$rows=null){$rows=$rows===null?$this->rows():$rows;$skip=$exclude?Hierarchy::descendants($rows,$exclude):array();$options=array();foreach(Hierarchy::flatten($rows) as $row)if(!in_array((int)$row['id'],$skip,true))$options[$row['id']]=str_repeat('— ',$row['_depth']).($row['name']??$row['label']);return $options;}
 
  public function revision($rows=null){$rows=$rows===null?$this->rows():$rows;$state=array();foreach($rows as $row)$state[]=array((int)$row['id'],(int)$row['parent_id'],(int)$row['sort_order']);return hash('sha256',CJSON::encode($state));}
  public function move($id,$target,$position,$revision){

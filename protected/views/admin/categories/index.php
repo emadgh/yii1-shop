@@ -1,2 +1,2 @@
 <div class="admin-page-head"><div><h1>دسته‌بندی‌های محصولات</h1><p>ساختار درختی را مرتب کنید و جزئیات هر دسته را کنار آن ویرایش کنید.</p></div><?= CHtml::link('+ دسته‌بندی جدید',array('adminCategory/index'),array('class'=>'btn btn-primary','data-pjax'=>'1','data-pjax-target'=>'#category-editor','data-pjax-reset-scroll'=>'1')) ?></div>
-<?php $this->widget('HierarchyEditor',array('treeOptions'=>array('selected'=>(int)$model->id),'formView'=>'//admin/categories/form','formData'=>array('model'=>$model))); ?>
+<?php $this->widget('HierarchyEditor',array('treeOptions'=>array('data'=>$treeData,'selected'=>(int)$model->id),'formView'=>'//admin/categories/form','formData'=>array('model'=>$model))); ?>

@@ -7,11 +7,11 @@
 <?php if(Commerce::showPrices()): ?><div class="detail-price"><?= Money::format($p->salePrice()) ?> <?php if($p->discountPercent()): ?><span class="discount-badge"><?= $p->discountPercent() ?>٪ تخفیف</span><?php endif; ?></div>
 <?php if(max((int)$p->compare_price,(int)$p->price)>$p->salePrice()): ?><div class="old-price"><?= Money::format(max($p->compare_price,$p->price)) ?></div><?php endif; ?>
 <?php endif; ?><p class="stock-label"><?= (int)$p->stock>0?'● موجود در انبار ('.(int)$p->stock.' عدد)':'○ ناموجود' ?></p>
-<?php $variants=$p->variants();if($variants): ?><div class="product-tags" aria-label="انتخاب رنگ و سایز"><?php foreach($variants as $variant): ?><?= CHtml::link(CHtml::encode($variant->variant_label?:$variant->title),$variant->link(),array('class'=>'tag','data-pjax'=>'1','aria-current'=>$variant->id===$p->id?'page':null)) ?><?php endforeach; ?></div><?php endif; ?><?php if(Commerce::enabled() && (int)$p->stock>0 && !(!$p->parent_product_id && $p->variants())): ?><?= CHtml::beginForm(array('cart/add'),'post',array('class'=>'buy-row','data-cart-form'=>'add')) ?>
+<?php if($variants): ?><div class="product-tags" aria-label="انتخاب رنگ و سایز"><?php foreach($variants as $variant): ?><?= CHtml::link(CHtml::encode($variant->variant_label?:$variant->title),$variant->link(),array('class'=>'tag','data-pjax'=>'1','aria-current'=>$variant->id===$p->id?'page':null)) ?><?php endforeach; ?></div><?php endif; ?><?php if(Commerce::enabled() && (int)$p->stock>0 && !(!$p->parent_product_id && $variants)): ?><?= CHtml::beginForm(array('cart/add'),'post',array('class'=>'buy-row','data-cart-form'=>'add')) ?>
 <?= CHtml::hiddenField('product_id',$p->id) ?><?= CHtml::numberField('quantity',1,array('min'=>1,'max'=>min(99,(int)$p->stock),'class'=>'qty-field','aria-label'=>'تعداد')) ?><?= CHtml::submitButton('افزودن به سبد خرید',array('class'=>'btn btn-primary')) ?><?= CHtml::endForm() ?><?php endif; ?>
 <div class="product-tags"><?php foreach($p->tags as $tag) echo CHtml::link('#'.CHtml::encode($tag->name),array('shop/index','tag'=>$tag->slug),array('class'=>'tag','data-pjax'=>'1')).' '; ?></div>
 </div></div>
-<?php $this->widget('ProductAlbums',array('product'=>$p)); ?>
+<?php $this->widget('ProductAlbums',array('product'=>$p,'albums'=>$albums)); ?>
 <div class="detail-sections"><section class="panel"><h2>توضیحات محصول</h2><div class="rich-content"><?= Content::markdown($p->description) ?></div></section>
 <?php if($p->specifications): ?><section class="panel"><h2>مشخصات فنی</h2><div class="spec-table">
 <?php foreach($p->specifications as $s): ?><div class="spec-row"><strong><?= CHtml::encode($s->name) ?></strong><span><?= CHtml::encode($s->value) ?></span></div><?php endforeach; ?>

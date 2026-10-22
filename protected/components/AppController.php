@@ -3,6 +3,7 @@ class AppController extends CController
 {
     public $layout='//layouts/main';
     public $socialImage='';
+    public $navigationRows=array('header'=>array(),'footer'=>array());
     public $pageTitle='بازارچه';
     public $metaDescription='فروشگاه اینترنتی بازارچه؛ خرید آسان و محصولات منتخب.';
     protected function beforeAction($action) { header('X-Content-Type-Options: nosniff');header('X-Frame-Options: SAMEORIGIN');header('Referrer-Policy: strict-origin-when-cross-origin'); OrderService::expire(); Yii::app()->params['currency']=Money::unit(); return parent::beforeAction($action); }
@@ -25,6 +26,7 @@ class AppController extends CController
             echo $html;
             return;
         }
+        if($this->layout==='//layouts/main')$this->navigationRows=NavigationQuery::all();
         return parent::render($view,$data,$return);
     }
 

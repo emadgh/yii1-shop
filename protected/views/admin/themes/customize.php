@@ -1,4 +1,4 @@
-<?php $collections=CHtml::listData(ProductCollection::model()->findAll(),'id','title'); ?>
+
 <div class="admin-page-head"><div><h1>شخصی‌سازی <?= CHtml::encode(ThemeService::catalog()[$key]['title']) ?></h1><p>تنظیمات هر قالب مستقل ذخیره می‌شود.</p></div><?= CHtml::link('نمایش زنده',ThemeService::previewUrl($key),array('class'=>'btn btn-outline','target'=>'_blank','data-no-pjax'=>'1')) ?></div>
 <?php if($error): ?><div class="flash flash-error"><?= CHtml::encode($error) ?></div><?php endif; ?>
 <?= CHtml::beginForm('','post',array('id'=>'theme-options-form')) ?><section class="panel"><h2>بنر اصلی</h2><div class="field"><label>عنوان</label><?= CHtml::textField('options[hero_title]',$options['hero_title'],array('maxlength'=>140)) ?></div><div class="field"><label>متن کوتاه</label><?= CHtml::textArea('options[hero_text]',$options['hero_text'],array('rows'=>3,'maxlength'=>500)) ?></div><?php $this->widget('MediaPicker',array('name'=>'options[hero_media]','value'=>$options['hero_media']?array($options['hero_media']):array(),'multiple'=>false,'label'=>'تصویر بنر')); ?><p class="muted">با پاک‌کردن تصویر، عکس پیش‌فرض هماهنگ با قالب استفاده می‌شود.</p></section>

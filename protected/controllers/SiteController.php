@@ -7,7 +7,7 @@ class SiteController extends AppController
     }
     public function actionIndex() {
        $this->pageTitle=ShopSettings::get('site_name').' | خانه';$this->metaDescription=ShopSettings::get('site_description');
-       $this->render('index');
+       $this->render('index',array('sections'=>HomePageQuery::sections()));
     }
     public function actionLogin() {
       header('Cache-Control: no-store');

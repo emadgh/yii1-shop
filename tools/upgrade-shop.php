@@ -16,3 +16,4 @@ $schema=$db->schema->getTable('users',true);foreach(array('totp_secret'=>"VARCHA
 $schema=$db->schema->getTable('notifications',true);if(!isset($schema->columns['dedupe_key']))$db->createCommand('ALTER TABLE notifications ADD COLUMN dedupe_key VARCHAR(64) NULL')->execute();
 $exists=$sqlite?$db->createCommand("SELECT COUNT(*) FROM sqlite_master WHERE type='index' AND name='uniq_notification_event'")->queryScalar():$db->createCommand("SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema=DATABASE() AND table_name='notifications' AND index_name='uniq_notification_event'")->queryScalar();if(!$exists)$db->createCommand()->createIndex('uniq_notification_event','notifications','dedupe_key',true);
 $db->schema->refresh();echo "Shop operations schema ready.\n";
+ProductRepository::advanceIdentityPastHistory();

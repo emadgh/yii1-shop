@@ -9,7 +9,7 @@ class AdminCategoryController extends AdminController {
    try{CmsMedia::bind($model,Yii::app()->request->getPost('image_id',''));if(Hierarchy::save($model,Yii::app()->request->getPost('tree_revision',''))){$this->flash('دسته‌بندی ذخیره شد.');$this->redirect(array('adminCategory/index','id'=>$model->id),false,303);return;}}
    catch(Exception $e){$model->addError('name',$e->getMessage());}
   }
-  $this->pageTitle='دسته‌بندی محصولات';$this->render('//admin/categories/index',array('model'=>$model));
+  $this->pageTitle='دسته‌بندی محصولات';$this->render('//admin/categories/index',array('model'=>$model,'treeData'=>HierarchyTreeQuery::data('categories',null,$model->id)));
  }
  public function actionCreate(){if(Yii::app()->request->isPostRequest){$this->actionIndex();return;}$this->redirect(array('adminCategory/index'));}
  public function actionUpdate($id){if(Yii::app()->request->isPostRequest){$this->actionIndex($id);return;}$this->redirect(array('adminCategory/index','id'=>$id));}

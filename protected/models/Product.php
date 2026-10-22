@@ -42,5 +42,10 @@ class Product extends BaseRecord
       return max(0,$price-($row['discount_type']==='percent'?intdiv($price*$value,100):($row['discount_type']==='fixed'?$value:0)));
     }
     public function salePrice() { return self::effectivePrice($this->attributes); }
+    public static function salePriceExpression($alias='t') {
+      if(!preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/D',$alias))throw new InvalidArgumentException('Invalid product alias');
+      $column=$alias.'.';$percent=Yii::app()->db->driverName==='mysql'?'FLOOR('.$column.'price*'.$column.'discount_value/100)':'CAST('.$column.'price*'.$column.'discount_value/100 AS INTEGER)';
+      return '('.$column."price-CASE WHEN ".$column."discount_type='percent' THEN ".$percent.' WHEN '.$column."discount_type='fixed' THEN ".$column.'discount_value ELSE 0 END)';
+    }
     public function discountPercent() { return $this->price>0?(int)round(100*(1-$this->salePrice()/$this->price)):0; }
 }

@@ -13,7 +13,7 @@ class AdminMenuController extends AdminController {
    try{if(Hierarchy::save($model,Yii::app()->request->getPost('tree_revision',''))){$this->flash('منو ذخیره شد.');$this->redirect(array('adminMenu/index','location'=>$location,'id'=>$model->id),false,303);return;}}
    catch(Exception $e){$model->addError('label',$e->getMessage());}
   }
-  $this->pageTitle='مدیریت منوها';$this->render('//admin/menus/index',array('model'=>$model,'location'=>$location));
+  $this->pageTitle='مدیریت منوها';$this->render('//admin/menus/index',array('model'=>$model,'location'=>$location,'treeData'=>HierarchyTreeQuery::data('menu_items',$location,$model->id)));
  }
  public function actionCreate($location='header'){$this->actionIndex($location);}
  public function actionUpdate($id){$model=$this->load($id);$this->actionIndex($model->location,$id);}

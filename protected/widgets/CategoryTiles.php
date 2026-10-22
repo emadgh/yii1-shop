@@ -1,5 +1,5 @@
 <?php
 class CategoryTiles extends CWidget {
- public $parent=null;
- public function run(){$criteria=new CDbCriteria;$criteria->order='sort_order,id';if($this->parent)$criteria->compare('parent_id',$this->parent);else $criteria->addCondition('parent_id IS NULL OR parent_id=0');$rows=Category::model()->findAll($criteria);if(!$rows)return;echo '<nav class="category-tiles" aria-label="دسته‌بندی محصولات">';foreach($rows as $row){$image=$row->image?MediaService::responsive($row->image,$row->name,array('loading'=>'lazy','sizes'=>'110px')):'<span class="category-symbol">✧</span>';echo CHtml::link($image.'<strong>'.CHtml::encode($row->name).'</strong>',array('shop/category','slug'=>$row->slug),array('data-pjax'=>'1'));}echo '</nav>';}
+ public $parent=null,$rows=array();
+ public function run(){$rows=$this->rows;if(!$rows)return;echo '<nav class="category-tiles" aria-label="دسته‌بندی محصولات">';foreach($rows as $row){$image=$row->image?MediaService::responsive($row->image,$row->name,array('loading'=>'lazy','sizes'=>'110px')):'<span class="category-symbol">✧</span>';echo CHtml::link($image.'<strong>'.CHtml::encode($row->name).'</strong>',array('shop/category','slug'=>$row->slug),array('data-pjax'=>'1'));}echo '</nav>';}
 }
