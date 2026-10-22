@@ -3,7 +3,13 @@
   "private": true,
   "scripts": {
     "test:browser": "node tools/verify-cms-browser.cjs --all",
-    "test:race": "node tools/verify-race.cjs"
+    "test:race": "node tools/verify-race.cjs",
+    "assets:vendor": "node tools/sync-vendor-assets.cjs"
   },
-  "devDependencies": {"playwright": "1.62.1"}
+  "devDependencies": {
+    "playwright": "1.62.1"
+  },
+  "dependencies": {
+    "@majidh1/jalalidatepicker": "1.0.0"
+  }
 }

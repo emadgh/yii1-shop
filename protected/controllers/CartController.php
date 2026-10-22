@@ -2,8 +2,19 @@
 class CartController extends AppController {
  protected function beforeAction($action){Commerce::requireEnabled();return parent::beforeAction($action);}
  public function actionIndex() { $this->pageTitle='سبد خرید'; $this->render('index',array('summary'=>Yii::app()->cart->summary())); }
- public function actionAdd() { $this->requirePost(); Yii::app()->cart->add(Yii::app()->request->getPost('product_id'),Yii::app()->request->getPost('quantity',1)); Yii::app()->user->setFlash('success','محصول به سبد خرید اضافه شد.');$this->redirect(array('cart/index')); }
- public function actionUpdate() { $this->requirePost();Yii::app()->cart->setQuantity(Yii::app()->request->getPost('product_id'),Yii::app()->request->getPost('quantity',0));$this->redirect(array('cart/index')); }
+ public function actionAdd(){$this->mutateCart(true);}
+ public function actionUpdate(){$this->mutateCart(false);}
+ public function actionSummary(){$this->cartResponse();}
+ private function mutateCart($add){
+  $this->requirePost();try{$method=$add?'add':'setQuantity';Yii::app()->cart->$method(Yii::app()->request->getPost('product_id'),Yii::app()->request->getPost('remove')==='1'?0:Yii::app()->request->getPost('quantity',$add?1:0));}
+  catch(CHttpException $e){if(!Yii::app()->request->isAjaxRequest)throw $e;$this->cartResponse($e->getMessage(),$e->statusCode);}
+  if(Yii::app()->request->isAjaxRequest)$this->cartResponse();
+  Yii::app()->user->setFlash('success','سبد خرید به‌روز شد.');$this->redirect(array('cart/index'));
+ }
+ private function cartResponse($error=null,$status=200){
+  $summary=Yii::app()->cart->summary();header('Content-Type: application/json; charset=utf-8');header('Cache-Control: no-store');http_response_code($status);
+  echo CJSON::encode(array('ok'=>$error===null,'error'=>$error,'count'=>$summary['count'],'mini'=>$this->widget('CartContents',array('summary'=>$summary,'compact'=>true),true),'page'=>$this->widget('CartContents',array('summary'=>$summary),true)));Yii::app()->end();
+ }
  public function actionCheckout() {
    $summary=Yii::app()->cart->summary(); if(!$summary['items'])$this->redirect(array('cart/index'));
    $form=new CheckoutForm; $coupon=trim((string)Yii::app()->request->getPost('coupon',''));$discount=0;

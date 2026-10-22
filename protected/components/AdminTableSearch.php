@@ -9,8 +9,9 @@ class AdminTableSearch extends CFormModel {
   if($scope==='orders' && isset($fields['status']) && !array_key_exists('status',$input))$this->values['status']=AdminTables::orderStatus();
  }
  public function control($key){$f=$this->fields[$key];$name='Grid['.$this->scope.']['.$key.']';$options=array('aria-label'=>'فیلتر '.$f['header'],'id'=>$this->scope.'-filter-'.$key);
+  if(($f['kind']??'')==='date')return JalaliDate::field($name,$this->values[$key],false,$options);
   if(isset($f['choices']))return CHtml::dropDownList($name,$this->values[$key],$f['choices'],array_merge($options,array('prompt'=>'همه')));
-  $numeric=in_array($f['kind']??'text',array('number','money','mixed-money'),true);$options['placeholder']=$numeric?'>=100':(($f['kind']??'')==='date'?'YYYY-MM-DD':'جستجو…');if($numeric||($f['kind']??'')==='date')$options['dir']='ltr';if($numeric)$options['title']='عدد دقیق یا مقایسه با >، <، >=، <= و !='.(($f['kind']??'')==='money'?'؛ به '.Money::unit():'');return CHtml::textField($name,$this->values[$key],$options);
+  $numeric=in_array($f['kind']??'text',array('number','money','mixed-money'),true);$options['placeholder']=$numeric?'>=100':'جستجو…';if($numeric)$options['dir']='ltr';if($numeric)$options['title']='عدد دقیق یا مقایسه با >، <، >=، <= و !='.(($f['kind']??'')==='money'?'؛ به '.Money::unit():'');return CHtml::textField($name,$this->values[$key],$options);
  }
  public function apply($criteria){foreach($this->fields as $key=>$f){$value=$this->values[$key];if($value==='')continue;$column=$f['sql']??'t.'.$key;$kind=$f['kind']??'text';
    if(isset($f['choices'])){if(!array_key_exists($value,$f['choices'])){$criteria->addCondition('1=0');continue;}$parameter=':grid_'.count($criteria->params);$criteria->addCondition($column.' = '.$parameter);$criteria->params[$parameter]=ctype_digit($value)?(int)$value:$value;continue;}
@@ -22,7 +23,7 @@ class AdminTableSearch extends CFormModel {
     try{$amount=($kind==='money'?Money::parse($digits):(int)$digits)*($negative?-1:1);}catch(Exception $e){$criteria->addCondition('1=0');continue;}
     if($kind==='mixed-money')$column="(CASE WHEN t.kind='fixed' THEN t.amount*".Money::factor().' ELSE t.amount END)';
     $parameter=':grid_'.count($criteria->params);$criteria->addCondition($column.' '.$operator.' '.$parameter);$criteria->params[$parameter]=$amount;
-   }else $criteria->addSearchCondition($column,$value);
+   }elseif($kind==='date'){try{$day=JalaliDate::parse($value,false);$next=(new DateTimeImmutable($day))->modify('+1 day')->format('Y-m-d');$p=':grid_'.count($criteria->params);$criteria->addCondition($column.' >= '.$p.' AND '.$column.' < '.$p.'_end');$criteria->params[$p]=$day.' 00:00:00';$criteria->params[$p.'_end']=$next.' 00:00:00';}catch(Exception $e){$criteria->addCondition('1=0');}}else $criteria->addSearchCondition($column,$value);
   }return $criteria;}
  public function provider($definition,$pageSize=20){
   $criteria=$this->apply(new CDbCriteria);$attributes=array();foreach($this->fields as $key=>$field){$sql=$field['sql']??'t.'.$key;$attributes[$key]=array('asc'=>$sql.' ASC','desc'=>$sql.' DESC','label'=>$field['header']);}

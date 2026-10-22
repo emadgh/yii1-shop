@@ -1,5 +1,6 @@
 <?php
 $cs=Yii::app()->clientScript;
+JalaliDate::assets();
 $cs->registerCssFile(Yii::app()->baseUrl.'/assets/css/app.css');
 $cs->registerCssFile(Yii::app()->baseUrl.'/assets/css/modern.css');
 $cs->registerCssFile(Yii::app()->baseUrl.'/assets/css/cms.css');

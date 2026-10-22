@@ -12,7 +12,7 @@ const path=require('node:path');
  try{
   await go('/');await page.screenshot({path:'protected/runtime/store-desktop.png',fullPage:true});
   assert.equal(await page.evaluate(()=>document.fonts.check('14px Vazir')),true);
-  assert.equal(await page.locator('.product-card img').count(),6);
+  const cards=await page.locator('.product-card').count();assert(cards>=6,'seeded products appear in configured homepage sections');assert.equal(await page.locator('.product-card img').count(),cards);
   console.log('PASS storefront local font, responsive images and render');
   await page.setViewportSize({width:390,height:844});await page.screenshot({path:'protected/runtime/store-mobile.png',fullPage:true});
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'store mobile overflow');
@@ -71,7 +71,7 @@ const path=require('node:path');
   await go('/product/minimal-desk-lamp');assert((await page.locator('.detail-price').textContent()).includes('14,280,000 ریال'));
   await go('/adminSettings/index');await page.locator('#currency').selectOption('toman');await page.getByRole('button',{name:'ذخیره تنظیمات',exact:true}).click();await page.waitForLoadState('networkidle');
   console.log('PASS settings save and real storefront currency conversion');
-  await go('/product/minimal-desk-lamp');await page.getByRole('button',{name:'افزودن به سبد خرید',exact:true}).click();await page.waitForURL('**/cart');
+  await go('/product/minimal-desk-lamp');await page.getByRole('button',{name:'افزودن به سبد خرید',exact:true}).click();await page.locator('#navbar-cart-popup:not([hidden])').waitFor();await page.getByRole('link',{name:'مشاهده سبد خرید',exact:true}).click();await page.waitForURL('**/cart');
   await page.getByRole('link',{name:'ادامه و ثبت سفارش ←',exact:true}).click();await page.locator('#CheckoutForm_customer_name').fill('تست جریان خرید');await page.locator('#CheckoutForm_customer_email').fill('browser@example.test');await page.locator('#CheckoutForm_customer_phone').fill('09123456789');await page.locator('#CheckoutForm_shipping_address').fill('تهران، نشانی تست مرورگر');await page.locator('#CheckoutForm_notes').fill('BROWSER-VERIFY');
   await page.locator('#coupon').fill('WELCOME10');await page.locator('[data-apply-coupon]').click();await page.waitForFunction(()=>document.getElementById('coupon-feedback').textContent.includes('قابل پرداخت'));
   await page.getByRole('button',{name:'ثبت سفارش و رزرو کالا',exact:true}).click();await page.waitForURL('**/cart/success*');const orderNumber=await page.locator('.success-screen>strong').textContent();assert.equal(await page.locator('.reservation-notice').count(),1);

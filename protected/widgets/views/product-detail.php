@@ -10,7 +10,7 @@
 <?php if(Commerce::showPrices()): ?><div class="detail-price"><?= Money::format($p->salePrice()) ?> <?php if($p->discountPercent()): ?><span class="discount-badge"><?= $p->discountPercent() ?>٪ تخفیف</span><?php endif; ?></div>
 <?php if(max((int)$p->compare_price,(int)$p->price)>$p->salePrice()): ?><div class="old-price"><?= Money::format(max($p->compare_price,$p->price)) ?></div><?php endif; ?>
 <?php endif; ?><p class="stock-label"><?= (int)$p->stock>0?'● موجود در انبار ('.(int)$p->stock.' عدد)':'○ ناموجود' ?></p>
-<?php if(Commerce::enabled() && (int)$p->stock>0): ?><?= CHtml::beginForm(array('cart/add'),'post',array('class'=>'buy-row')) ?>
+<?php if(Commerce::enabled() && (int)$p->stock>0): ?><?= CHtml::beginForm(array('cart/add'),'post',array('class'=>'buy-row','data-cart-form'=>'add')) ?>
 <?= CHtml::hiddenField('product_id',$p->id) ?><?= CHtml::numberField('quantity',1,array('min'=>1,'max'=>min(99,(int)$p->stock),'class'=>'qty-field','aria-label'=>'تعداد')) ?><?= CHtml::submitButton('افزودن به سبد خرید',array('class'=>'btn btn-primary')) ?><?= CHtml::endForm() ?><?php endif; ?>
 <div class="product-tags"><?php foreach($p->tags as $tag) echo CHtml::link('#'.CHtml::encode($tag->name),array('shop/index','tag'=>$tag->slug),array('class'=>'tag','data-pjax'=>'1')).' '; ?></div>
 </div></div>

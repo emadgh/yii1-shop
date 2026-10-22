@@ -1,6 +1,7 @@
 <?php
 date_default_timezone_set('Asia/Tehran');
 $root=dirname(__DIR__,2);
+require_once $root.'/vendor/autoload.php';
 $dsn=getenv('SHOP_DSN') ?: 'sqlite:'.$root.'/protected/runtime/store.sqlite';
 $config=array(
   'basePath'=>dirname(__DIR__),

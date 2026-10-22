@@ -4,7 +4,7 @@ class AdminTable extends CWidget {
  public function run(){
   $scope=$this->scope?:$this->type;$definition=AdminTables::definition($this->type,$this->context);$fields=$definition['fields'];if($this->only)$fields=array_intersect_key($fields,array_flip($this->only));
   foreach(array($scope.'_sort',$scope.'_page') as $parameter)if(isset($_GET[$parameter])&&!is_scalar($_GET[$parameter]))throw new CHttpException(400,'پارامتر جدول معتبر نیست.');
-  $search=new AdminTableSearch($scope,$fields);$provider=$search->provider($definition,$this->pageSize);$columns=array();foreach($fields as $key=>$field){$column=array('name'=>$key,'header'=>$field['header'],'filter'=>$search->control($key));if(isset($field['value']))$column['value']=$field['value'];if(isset($field['type']))$column['type']=$field['type'];$columns[]=$column;}
+  $search=new AdminTableSearch($scope,$fields);$provider=$search->provider($definition,$this->pageSize);$columns=array();foreach($fields as $key=>$field){$column=array('name'=>$key,'header'=>$field['header'],'filter'=>$search->control($key));if(($field['kind']??'')==='date')$column['value']=function($data)use($key){return JalaliDate::format($data[$key]);};if(isset($field['value']))$column['value']=$field['value'];if(isset($field['type']))$column['type']=$field['type'];$columns[]=$column;}
   if(isset($definition['action']))$columns[]=array('header'=>'عملیات','type'=>'raw','filter'=>false,'value'=>$definition['action']);
   echo '<div id="'.CHtml::encode($scope).'-region" data-pjax-region="1" data-pjax-scope="'.CHtml::encode($scope).'">';
   echo CHtml::beginForm(Yii::app()->createUrl($this->controller->route),'get',array('class'=>'admin-grid-form','data-pjax-form'=>'1','data-grid-scope'=>$scope));

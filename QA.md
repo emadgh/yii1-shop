@@ -64,3 +64,10 @@ Scope: tested on PHP 8.4 / SQLite / Chrome. MySQL execution and an external Mato
 - Simulated failed requests retained the existing table, cleared the overlay and allowed retry. Independent report filters remained in both visible controls and the URL after other-grid updates.
 - `node tools/verify-cms-browser.cjs --all` passed the CMS, product/blog/media/checkout, HTTP, theme, admin-table and new category/PJAX suites. `--pjax` runs the focused category/PJAX browser checks on a temporary database.
 - The existing 24 CMS checks also passed after adding optional hierarchy revisions. PHP/JavaScript syntax and Git whitespace checks passed. Local runtime remains PHP 8.4 / SQLite / Chrome.
+
+## Jalali calendar and Ajax cart — 2026-10-22
+
+- Added 20 isolated calendar checks covering Nowruz, leap Esfand, Persian/Arabic digits, invalid dates/times, conversion round trips, and half-open SQL date filters across the year boundary. Stored timestamps remain Gregorian in Tehran time.
+- Dedicated browser coverage exercises product-page Ajax add with automatic navbar opening, popup quantity updates, cart-page quantity/removal, synchronized quantities, unchanged document markers, quantity validation, stock caps and CSRF rejection.
+- Browser checks open the Jalali picker after PJAX, save coupon dates and compare the canonical SQL values, exercise grid date pickers, inspect category thumbnail sizing, and check popup bounds on mobile and across all four themes.
+- The browser harness supports `--cart` for focused checks using a temporary SQLite database. The full suite also runs these checks. Local validation uses PHP 8.4 / SQLite / Chrome; MySQL and actual PHP 7.4 execution are not covered locally. Composer resolves against PHP 7.4.33 for dependency compatibility.

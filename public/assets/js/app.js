@@ -38,7 +38,7 @@ function api(path,data,section){
  var opt={credentials:'same-origin',headers:{'X-Requested-With':'XMLHttpRequest','Accept':'application/json'}};
  if(data){opt.method='POST';if(!(data instanceof FormData)){var form=new FormData();Object.keys(data).forEach(function(k){form.append(k,data[k]);});data=form;}data.append(csrfName.content,csrf.content);opt.body=data;}
  var release=section?ShopUI.busy(section,data?'در حال انجام…':'در حال بارگذاری…'):function(){};ShopUI.progress(true);
- return fetch(base+path,opt).then(function(r){return r.json().then(function(j){if(!r.ok||j.ok===false)throw new Error(j.error||'دریافت اطلاعات ناموفق بود.');return j;});}).finally(function(){release();ShopUI.progress(false);});
+ return fetch(base+path,opt).then(async function(r){var j;try{j=await r.json();}catch(e){throw new Error('دریافت اطلاعات ناموفق بود؛ دوباره تلاش کنید.');}if(!r.ok||j.ok===false){var error=new Error(j.error||'دریافت اطلاعات ناموفق بود.');error.payload=j;throw error;}return j;}).finally(function(){release();ShopUI.progress(false);});
 }
 window.ShopAPI=api;
 function init(){
@@ -86,7 +86,7 @@ document.addEventListener('change',function(e){if(e.target.matches('[data-discou
 document.addEventListener('submit',function(e){
  var form=e.target;
  if(form.hasAttribute('data-confirm')&&!form.dataset.confirmed){e.preventDefault();e.stopImmediatePropagation();var submitter=e.submitter;ShopUI.confirm(form.dataset.confirm).then(function(ok){if(ok){form.dataset.confirmed='1';form.requestSubmit(submitter);delete form.dataset.confirmed;}});return;}
- if(!e.defaultPrevented&&form.method.toUpperCase()==='POST'&&!(form.dataset.pjaxForm==='1'&&window.ShopPjax)){nativeBusyReleases.push(ShopUI.busy(form.closest('[data-pjax-region],.panel')||form,'در حال ثبت…'));ShopUI.progress(true);}
+ if(!form.hasAttribute('data-cart-form')&&!e.defaultPrevented&&form.method.toUpperCase()==='POST'&&!(form.dataset.pjaxForm==='1'&&window.ShopPjax)){nativeBusyReleases.push(ShopUI.busy(form.closest('[data-pjax-region],.panel')||form,'در حال ثبت…'));ShopUI.progress(true);}
 },true);
 window.addEventListener('beforeunload',function(){ShopUI.progress(true);});
 window.addEventListener('pageshow',function(){nativeBusyReleases.splice(0).forEach(function(release){release();});pending=0;ShopUI.progress(false);});

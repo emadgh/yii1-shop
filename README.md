@@ -144,6 +144,7 @@ php tools/verify-commerce.php
 php tools/verify-cms.php
 php tools/verify-admin-tables.php
 php tools/verify-category-tree.php
+php tools/verify-jalali.php
 npm install
 npx playwright install chromium
 npm run test:race
@@ -151,3 +152,13 @@ npm run test:browser
 ```
 
 آزمون مرورگر یک وب‌سرور موقت و کپی دیتابیس می‌سازد و داده‌های اصلی را ویرایش نمی‌کند. برای حساب آزمایشی نصب خودتان، `SHOP_TEST_EMAIL` و `SHOP_TEST_PASSWORD` را تنظیم کنید. پیش‌فرض این ابزارها فقط حساب دموی `demo@bazaarche.test` با رمز `BazaarcheTest123!` است؛ نصب‌کننده چنین حسابی را خودکار نمی‌سازد. `SHOP_PHP_BINARY` و `SHOP_CHROME_BINARY` مسیرهای اختیاری ابزارها هستند. تست‌های PHP و هم‌زمانی هم دیتابیس جداگانه دارند. گزارش اعتبارسنجی در [QA.md](QA.md) است.
+
+## تاریخ جلالی و سبد خرید Ajax
+
+تاریخ‌های وبلاگ، سفارش، رزرو، گزارش مالی، انبار و نمودار بازدید با تقویم جلالی نمایش داده می‌شوند. فیلتر روز و اعتبار کد تخفیف انتخابگر جلالی دارند؛ ورود دستی با ارقام فارسی، عربی و لاتین پشتیبانی می‌شود. ذخیره‌سازی و مرتب‌سازی تاریخ‌ها همچنان Gregorian با ساعت تهران است تا رزرو و محاسبات بدون تغییر بمانند.
+
+کتابخانه PHP [morilog/jalali](https://github.com/morilog/jalali) با Composer و انتخابگر [JalaliDatePicker 1.0.0](https://github.com/majidh1/JalaliDatePicker) با npm قفل شده‌اند. فایل‌های انتخابگر و مجوز MIT داخل `public/assets/vendor/jalalidatepicker` نگهداری می‌شوند؛ مرورگر به CDN نیاز ندارد. بعد از تغییر نسخه، با `npm run assets:vendor` فایل‌های آماده را بازسازی کنید. حداقل PHP اعلام‌شده پروژه در تنظیم Composer حفظ شده است.
+
+ویجت‌های Yii به نام `MiniCart` و `CartContents` سبد بالای سایت و صفحه سبد را نمایش می‌دهند. افزودن، تغییر تعداد و حذف با Ajax و لودینگ همان قسمت انجام می‌شود؛ پاسخ سرور مبلغ و تعداد هر دو نما را هماهنگ می‌کند. کنترل موجودی و قیمت در سرور باقی می‌ماند. پس از ثبت نهایی سفارش، سبد بالای صفحه هم خالی می‌شود.
+
+آزمون متمرکز روی یک کپی موقت دیتابیس: `node tools/verify-cms-browser.cjs --cart`؛ در اجرای کامل آزمون مرورگر هم گنجانده شده است.
