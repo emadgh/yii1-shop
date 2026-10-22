@@ -142,6 +142,7 @@ php tools/reservations.php --watch
 ```sh
 php tools/verify-commerce.php
 php tools/verify-cms.php
+php tools/verify-admin-tables.php
 npm install
 npx playwright install chromium
 npm run test:race

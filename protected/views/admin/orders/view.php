@@ -1,14 +1,12 @@
 <div class="admin-page-head"><div><span class="eyebrow">سفارش / <?= CHtml::encode($order->order_number) ?></span><h1>جزئیات سفارش</h1><p>ثبت در <?= CHtml::encode($order->created_at) ?></p></div><?= CHtml::link('بازگشت به سفارش‌ها',array('adminOrder/index'),array('class'=>'btn btn-outline','data-pjax'=>'1')) ?></div>
-<div class="admin-form-grid"><div class="form-main"><section class="panel"><h2>اقلام سفارش</h2><div class="table-wrap"><table class="data-table"><thead><tr><th>محصول</th><th>شناسه</th><th>تعداد</th><th>قیمت واحد</th><th>مجموع</th></tr></thead><tbody>
-<?php foreach($order->items as $item): ?><tr><td><?= CHtml::encode($item->product_title) ?></td><td dir="ltr"><?= CHtml::encode($item->sku) ?></td><td><?= (int)$item->quantity ?></td><td><?= Money::format($item->price) ?></td><td><?= Money::format($item->line_total) ?></td></tr><?php endforeach; ?>
-</tbody></table></div><div class="summary-row total"><strong>مبلغ کل</strong><strong><?= Money::format($order->total) ?></strong></div></section>
+<div class="admin-form-grid"><div class="form-main"><section class="panel"><h2>اقلام سفارش</h2><?php $this->widget("AdminTable",array("type"=>"order-items","context"=>array("order"=>$order->id))); ?><div class="summary-row total"><strong>مبلغ کل</strong><strong><?= Money::format($order->total) ?></strong></div></section>
 <section class="panel"><h2>اطلاعات خریدار</h2><div class="spec-table">
 <div class="spec-row"><strong>نام</strong><span><?= CHtml::encode($order->customer_name) ?></span></div>
 <div class="spec-row"><strong>ایمیل</strong><span dir="ltr"><?= CHtml::encode($order->customer_email) ?></span></div>
 <div class="spec-row"><strong>تلفن</strong><span dir="ltr"><?= CHtml::encode($order->customer_phone) ?></span></div>
 <div class="spec-row"><strong>نشانی</strong><span><?= nl2br(CHtml::encode($order->shipping_address)) ?></span></div>
 <div class="spec-row"><strong>یادداشت</strong><span><?= nl2br(CHtml::encode($order->notes)) ?></span></div></div></section></div>
-<aside class="form-aside"><section class="panel"><h2>وضعیت سفارش</h2><span class="status status-<?= CHtml::encode($order->status) ?>"><?= CHtml::encode($order->statuses()[$order->status]) ?></span>
+<aside class="form-aside"><section class="panel"><h2>وضعیت سفارش</h2><?= OrderPresentation::badge($order->status) ?>
 <?php if($order->nextStatuses()): ?><?= CHtml::beginForm(array('adminOrder/status','id'=>$order->id),'post',array('data-confirm'=>'تغییر وضعیت و ثبت گردش مالی/انبار انجام شود؟')) ?>
 <div class="field"><label>تغییر وضعیت</label><?= CHtml::dropDownList('status',null,$order->nextStatuses()) ?></div><?= CHtml::submitButton('ثبت وضعیت',array('class'=>'btn btn-primary btn-block')) ?><?= CHtml::endForm() ?>
 <?php else: ?><p class="muted note">این سفارش در وضعیت نهایی است و قابل تغییر نیست.</p><?php endif; ?>

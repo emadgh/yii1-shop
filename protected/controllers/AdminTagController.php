@@ -1,11 +1,8 @@
 <?php
 class AdminTagController extends AdminController
 {
-    public function actionIndex() {
-      $this->pageTitle='مدیریت تگ‌ها';
-      $this->render('//admin/tags/index',array('provider'=>new CActiveDataProvider('Tag',array('criteria'=>array('order'=>'t.id DESC'),'pagination'=>array('pageSize'=>20)))));
-    }
-    public function actionCreate() { $this->edit(new Tag); }
+    public function actionIndex() { $this->pageTitle='مدیریت تگ‌ها';$this->render('//admin/tags/index'); }
+ public function actionCreate() { $this->edit(new Tag); }
     public function actionUpdate($id) { $this->edit($this->load($id)); }
     private function edit($model) {
       if(isset($_POST['Tag'])) {

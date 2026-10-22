@@ -3,6 +3,8 @@ $cs=Yii::app()->clientScript;
 $cs->registerCssFile(Yii::app()->baseUrl.'/assets/css/app.css');
 $cs->registerCssFile(Yii::app()->baseUrl.'/assets/css/modern.css');
 $cs->registerCssFile(Yii::app()->baseUrl.'/assets/css/cms.css');
+$cs->registerCssFile(Yii::app()->baseUrl.'/assets/css/admin-tables.css');
+$cs->registerScriptFile(Yii::app()->baseUrl.'/assets/js/admin-tables.js',CClientScript::POS_END);
 $cs->registerScriptFile(Yii::app()->baseUrl.'/assets/js/cms.js',CClientScript::POS_END);
 $cs->registerCssFile(Yii::app()->baseUrl.'/assets/css/themes-admin.css');
 $cs->registerScriptFile(Yii::app()->baseUrl.'/assets/js/app.js',CClientScript::POS_END);

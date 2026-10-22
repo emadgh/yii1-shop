@@ -1,0 +1,1 @@
+(function(){'use strict';document.addEventListener('change',function(e){if(e.target.matches('.admin-grid-form .filters select'))e.target.closest('form').requestSubmit();});document.addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target.matches('.admin-grid-form .filters input')){e.preventDefault();e.target.closest('form').requestSubmit();}});})();

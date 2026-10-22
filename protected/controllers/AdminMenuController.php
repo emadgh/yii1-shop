@@ -1,6 +1,6 @@
 <?php
 class AdminMenuController extends AdminController {
- public function actionIndex(){$this->pageTitle='مدیریت منو';$this->render('//admin/menus/index',array('rows'=>Hierarchy::rows('menu_items')));}
+ public function actionIndex() { $this->pageTitle='مدیریت منو';$this->render('//admin/menus/index'); }
  public function actionCreate(){$this->edit(new MenuItem);}
  public function actionUpdate($id){$this->edit($this->load($id));}
  private function load($id){$m=MenuItem::model()->findByPk($id);if(!$m)$this->notFound();return $m;}

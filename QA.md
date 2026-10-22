@@ -48,3 +48,10 @@ Scope: MySQL code paths were not executed here. Payment confirmation is manual; 
 - GitHub Actions workflow is included for fresh SQLite installation, syntax, service, concurrency and browser checks; a remote workflow result is separate from the locally observed passes above.
 
 Scope: tested on PHP 8.4 / SQLite / Chrome. MySQL execution and an external Matomo instance were not exercised. Matomo remains optional and unset. Built-in daily visitor counts are browser-session estimates, not person-level identity.
+
+## Dashboard and management tables — 2026-10-22
+
+- 22 isolated SQLite assertions passed for actual discounted-price sorting/filtering, Persian/grouped numeric input, rial conversion, combined filters, enum validation, literal/wildcard escaping, sort whitelisting, aggregate report filtering, scoped order items, removed-product fallback, daily visit counts, zero-day filling, paused analytics and consistent reporting boundaries.
+- Browser checks passed for dashboard daily bars, server-derived totals, pagination, column controls and sortable headings across all management listings, combined filters preserved after reload, reset, independent report grids, matching status colors/selection, linked order thumbnails, 90-day charts and mobile overflow.
+- The existing product/blog/media/checkout/HTTP/theme browser suites passed after the GridView migration. New tests are included in the isolated browser runner; the HTTP reconciliation assertion now checks result badges rather than matching filter dropdown option labels.
+- Filter inputs use bound parameters; sort expressions and enum choices are defined by the application. Reports filter the complete dataset before pagination. MySQL remains outside the locally exercised runtime.

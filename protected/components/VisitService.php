@@ -1,6 +1,13 @@
 <?php
 class VisitService {
  public static function enabled(){return ShopSettings::get('analytics_enabled','1')==='1';}
+ public static function summary($days=7){
+  $days=max(1,min(90,(int)$days));$today=strtotime('today');$start=date('Y-m-d 00:00:00',$today-86400*($days-1));$end=date('Y-m-d 00:00:00',$today+86400);
+  $rows=Yii::app()->db->createCommand('SELECT SUBSTR(created_at,1,10) day,COUNT(*) views,COUNT(DISTINCT visitor_hash) visitors FROM page_visits WHERE created_at>=:start AND created_at<:end GROUP BY SUBSTR(created_at,1,10) ORDER BY day')->queryAll(true,array(':start'=>$start,':end'=>$end));
+  $map=array();foreach($rows as $row)$map[$row['day']]=$row;$daily=array();$views=0;$visitors=0;
+  for($i=$days-1;$i>=0;$i--){$day=date('Y-m-d',$today-86400*$i);$row=$map[$day]??array('day'=>$day,'views'=>0,'visitors'=>0);$row['views']=(int)$row['views'];$row['visitors']=(int)$row['visitors'];$daily[]=$row;$views+=$row['views'];$visitors+=$row['visitors'];}
+  return array('days'=>$days,'views'=>$views,'visitors'=>$visitors,'daily'=>$daily,'today'=>end($daily),'enabled'=>self::enabled());
+ }
  private static function secret(){
   $path=Yii::getPathOfAlias('application.runtime').'/analytics.key';if(!is_file($path)){$handle=@fopen($path,'x');if($handle){fwrite($handle,bin2hex(random_bytes(32)));fclose($handle);@chmod($path,0600);}}
   $secret=@file_get_contents($path);if(!$secret)throw new Exception('Analytics key unavailable');return $secret;

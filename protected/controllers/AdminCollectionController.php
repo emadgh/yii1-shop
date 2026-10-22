@@ -1,6 +1,6 @@
 <?php
 class AdminCollectionController extends AdminController {
- public function actionIndex(){$this->pageTitle='کالکشن‌های محصولات';$this->render('//admin/collections/index',array('rows'=>ProductCollection::model()->findAll(array('order'=>'id DESC'))));}
+ public function actionIndex() { $this->pageTitle='کالکشن‌های محصولات';$this->render('//admin/collections/index'); }
  public function actionCreate(){$this->edit(new ProductCollection);}
  public function actionUpdate($id){$this->edit($this->load($id));}
  private function load($id){$m=ProductCollection::model()->findByPk($id);if(!$m)$this->notFound();return $m;}

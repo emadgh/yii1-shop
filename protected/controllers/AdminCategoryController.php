@@ -1,11 +1,8 @@
 <?php
 class AdminCategoryController extends AdminController
 {
-    public function actionIndex() {
-      $this->pageTitle='دسته‌بندی محصولات';
-      $this->render('//admin/categories/index',array('provider'=>new CActiveDataProvider('Category',array('criteria'=>array('order'=>'t.id DESC'),'pagination'=>array('pageSize'=>20)))));
-    }
-    public function actionCreate() { $this->edit(new Category); }
+    public function actionIndex() { $this->pageTitle='دسته‌بندی محصولات';$this->render('//admin/categories/index'); }
+ public function actionCreate() { $this->edit(new Category); }
     public function actionUpdate($id) { $this->edit($this->load($id)); }
     private function edit($model) {
       if(isset($_POST['Category'])) {

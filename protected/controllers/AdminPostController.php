@@ -1,6 +1,6 @@
 <?php
 class AdminPostController extends AdminController {
- public function actionIndex(){ $this->pageTitle='مدیریت بلاگ';$this->render('//admin/posts/index',array('provider'=>new CActiveDataProvider('Post',array('criteria'=>array('order'=>'t.id DESC'),'pagination'=>array('pageSize'=>20))))); }
+ public function actionIndex() { $this->pageTitle='مدیریت بلاگ';$this->render('//admin/posts/index'); }
  public function actionCreate(){ $this->edit(new Post); }
  public function actionUpdate($id){ $this->edit($this->load($id)); }
  private function edit($model){

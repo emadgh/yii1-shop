@@ -1,6 +1,6 @@
 <?php
 class AdminCouponController extends AdminController {
- public function actionIndex() { $this->pageTitle='کدهای تخفیف';$this->render('//admin/coupons/index',array('coupons'=>Coupon::model()->findAll(array('order'=>'id DESC')))); }
+ public function actionIndex() { $this->pageTitle='کدهای تخفیف';$this->render('//admin/coupons/index'); }
  public function actionCreate() { $this->edit(new Coupon); }
  public function actionUpdate($id) { $m=Coupon::model()->findByPk($id);if(!$m)$this->notFound();$this->edit($m); }
  private function edit($model) {

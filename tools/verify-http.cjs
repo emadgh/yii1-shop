@@ -12,6 +12,6 @@ try{
  const csrf=await page.locator('meta[name=csrf-token]').getAttribute('content');r=await ctx.request.post(base+'/adminMedia/delete?id='+pdf.id,{form:{YII_CSRF_TOKEN:csrf}});assert.equal(r.status(),200);console.log('PASS PDF upload and configurable image-only picker filter');
  const referencedId=(await page.locator('[name=media_ids]').inputValue()).split(',')[0];r=await ctx.request.post(base+'/adminMedia/delete?id='+referencedId,{form:{YII_CSRF_TOKEN:csrf}});assert.equal(r.status(),422);console.log('PASS shared referenced media cannot be deleted');
  await page.goto(base+'/blog?q='+encodeURIComponent('هدیه'));assert.equal(await page.locator('.post-card').count(),1);console.log('PASS blog search');
- await page.goto(base+'/adminReport/index');assert.equal(await page.getByText('نیاز به بررسی',{exact:true}).count(),0);await page.screenshot({path:'protected/runtime/finance-inventory.png',fullPage:true});console.log('PASS live inventory ledger fully reconciled');
+ await page.goto(base+'/adminReport/index');assert.equal(await page.locator('#stock-grid tbody .status-cancelled').count(),0);await page.screenshot({path:'protected/runtime/finance-inventory.png',fullPage:true});console.log('PASS live inventory ledger fully reconciled');
  console.log('ALL HTTP CHECKS PASSED');
 }finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

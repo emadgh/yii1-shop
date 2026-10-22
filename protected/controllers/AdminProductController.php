@@ -1,10 +1,6 @@
 <?php
 class AdminProductController extends AdminController {
- public function actionIndex() {
-   $criteria=new CDbCriteria;$q=trim((string)Yii::app()->request->getQuery('q',''));
-   if($q) SearchService::products($criteria,$q);$criteria->order='t.id DESC';
-   $this->pageTitle='مدیریت محصولات';$this->render('//admin/products/index',array('provider'=>new CActiveDataProvider('Product',array('criteria'=>$criteria,'pagination'=>array('pageSize'=>20))),'q'=>$q));
- }
+ public function actionIndex() { $this->pageTitle='مدیریت محصولات';$this->render('//admin/products/index'); }
  public function actionCreate() { $m=new Product;$m->discount_type='none';$m->discount_value=0;$m->price=0;$m->compare_price=0;$m->stock=0;$this->edit($m); }
  public function actionUpdate($id) { $this->edit($this->load($id)); }
  private function edit($model) {
