@@ -52,7 +52,7 @@ const path=require('node:path');
   const upload=page.waitForResponse(r=>r.url().includes('/adminMedia/upload')&&r.request().method()==='POST');
   await page.locator('#media-upload').setInputFiles('public/assets/storefront/product-lamp.webp');const uploadResponse=await upload;assert.equal(uploadResponse.status(),200);const uploadResult=await uploadResponse.json();assert.equal(Object.keys(uploadResult.item.variants).length,3);await page.locator('[data-close-media]').first().click();
   const deleted=await api('/adminMedia/delete?id='+uploadResult.item.id,{});assert.equal(deleted.status,200);
-  const referencedId=(await page.locator('[name=media_ids]').inputValue()).split(',')[0];const referenced=await api('/adminMedia/delete?id='+referencedId,{});assert.equal(referenced.status,422);
+  const referencedId=(await page.locator('[data-album-row] .media-value').first().inputValue()).split(',')[0];const referenced=await api('/adminMedia/delete?id='+referencedId,{});assert.equal(referenced.status,422);
   console.log('PASS AJAX image upload creates WebP variants; referenced media deletion protected');
   await go('/adminReport/index');await page.screenshot({path:'protected/runtime/finance-inventory.png',fullPage:true});
 

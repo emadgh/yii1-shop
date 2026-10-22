@@ -1,0 +1,11 @@
+<div class="product-albums" data-product-albums>
+<?php foreach($albums as $album):if(!$album->images)continue;$albumId='album-'.(int)$album->id;$layout=isset(ProductAlbum::layouts()[$album->layout])?$album->layout:'grid'; ?>
+<section class="product-album album-layout-<?= CHtml::encode($layout) ?>" data-product-album data-album-layout="<?= CHtml::encode($layout) ?>" aria-labelledby="<?= $albumId ?>-title">
+<div class="album-public-head"><div><span class="eyebrow">آلبوم تصاویر</span><h2 id="<?= $albumId ?>-title"><?= CHtml::encode($album->title) ?></h2><span class="muted note"><?= count($album->images) ?> تصویر</span></div>
+<?php if(in_array($layout,array('carousel','slideshow'),true)): ?><div class="album-controls"><button type="button" data-album-direction="-1" aria-controls="<?= $albumId ?>-track" aria-label="تصویر قبلی">→</button><span data-album-position dir="ltr" class="note" aria-live="polite"><?= $layout==='slideshow'?'۱ / '.count($album->images):'' ?></span><button type="button" data-album-direction="1" aria-controls="<?= $albumId ?>-track" aria-label="تصویر بعدی">←</button></div><?php endif; ?></div>
+<div id="<?= $albumId ?>-track" class="album-track" data-album-track <?= $layout==='carousel'?'tabindex="0" aria-label="تصاویر آلبوم؛ پیمایش افقی"':'' ?>>
+<?php foreach($album->images as $index=>$image): ?><button type="button" class="album-image" data-album-open data-full="<?= CHtml::encode(UploadService::url($image->filename)) ?>" aria-label="<?= CHtml::encode('بزرگ‌نمایی '.$album->title.'، تصویر '.($index+1)) ?>" <?= $layout==='slideshow'&&$index>0?'hidden':'' ?>><?= MediaService::responsive($image->filename,$image->alt_text?:$this->product->title,array('loading'=>'lazy','sizes'=>$layout==='slideshow'?'(max-width: 800px) 92vw, 1100px':'(max-width: 800px) 45vw, 220px')) ?></button><?php endforeach; ?>
+</div></section>
+<?php endforeach; ?>
+<dialog class="album-viewer" data-album-viewer aria-label="نمایش بزرگ تصاویر"><div class="album-viewer-bar"><span data-viewer-caption aria-live="polite"></span><button type="button" data-viewer-close aria-label="بستن تصویر">×</button></div><div class="album-viewer-stage"><button type="button" data-viewer-direction="-1" aria-label="تصویر قبلی">→</button><img data-viewer-image alt=""><button type="button" data-viewer-direction="1" aria-label="تصویر بعدی">←</button></div></dialog>
+</div>

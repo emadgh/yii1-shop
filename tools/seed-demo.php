@@ -50,3 +50,4 @@ foreach(array('pending','confirmed','paid','shipped','completed','returned','can
 echo count($media)." media assets; demo order scenarios ready. Coupon: WELCOME10\n";
 
 require __DIR__.'/seed-cms.php';
+require __DIR__.'/upgrade-albums.php';

@@ -1,0 +1,1 @@
+.sortable-ghost{position:fixed;z-index:1500;pointer-events:none;max-width:300px;padding:10px 16px;background:#405b41;color:#fff;border-radius:3px;font-size:12px;box-shadow:0 8px 24px #10201230}.sort-is-dragging{opacity:.35}.sort-drop-before{box-shadow:0 -3px 0 #47734c}.sort-drop-after{box-shadow:0 3px 0 #47734c}

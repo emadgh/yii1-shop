@@ -24,8 +24,9 @@ class UploadService
         $path=Yii::app()->params['uploadsDir'].'/'.$relative;
         if(is_file($path)) @unlink($path);
     }
+    public static function validPath($relative){return is_string($relative)&&preg_match('~^(?:(?:products|blog)/[a-f0-9]{32}\.(?:jpg|png|webp)|media/[a-f0-9]{32}(?:-(?:thumb|medium|large))?\.(?:webp|pdf|txt))$~D',$relative)===1;}
     public static function url($relative) {
-       if(!$relative || !preg_match('~^(?:(?:products|blog)/[a-f0-9]{32}\.(?:jpg|png|webp)|media/[a-f0-9]{32}(?:-(?:thumb|medium|large))?\.(?:webp|pdf|txt))$~D',$relative)) return '';
+       if(!self::validPath($relative)) return '';
        return Yii::app()->baseUrl.'/uploads/'.$relative;
     }
 }

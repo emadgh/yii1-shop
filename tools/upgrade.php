@@ -34,3 +34,4 @@ try {
 require __DIR__.'/upgrade-cms.php';
 
 require __DIR__.'/upgrade-shop.php';
+require __DIR__.'/upgrade-albums.php';

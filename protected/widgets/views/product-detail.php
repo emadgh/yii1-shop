@@ -2,9 +2,6 @@
 <div class="breadcrumbs"><?= CHtml::link('فروشگاه',array('shop/index'),array('data-pjax'=>'1')) ?> / <?= CHtml::encode($p->title) ?></div>
 <div class="product-detail product-layout-<?= CHtml::encode($layout) ?>"><div class="gallery">
 <div class="gallery-cover"><?php if($p->cover()): ?><?= MediaService::responsive($p->images[0]->filename,$p->title,array('id'=>'main-product-image')) ?><?php else: ?><div class="image-fallback">✧</div><?php endif; ?></div>
-<?php if(count($p->images)>1): ?><div class="thumbnails"><?php foreach($p->images as $img): ?>
-<button type="button" class="thumb" data-gallery-src="<?= CHtml::encode(UploadService::url($img->filename)) ?>" aria-label="نمایش تصویر"><?= MediaService::responsive($img->filename,$p->title,array('loading'=>'lazy','sizes'=>'76px')) ?></button>
-<?php endforeach; ?></div><?php endif; ?>
 </div><div class="product-info"><span class="eyebrow"><?= $p->category?CHtml::encode($p->category->name):'بازارچه' ?></span><h1><?= CHtml::encode($p->title) ?></h1>
 <div class="product-summary"><?= Content::markdown($p->summary) ?></div>
 <?php if(Commerce::showPrices()): ?><div class="detail-price"><?= Money::format($p->salePrice()) ?> <?php if($p->discountPercent()): ?><span class="discount-badge"><?= $p->discountPercent() ?>٪ تخفیف</span><?php endif; ?></div>
@@ -14,6 +11,7 @@
 <?= CHtml::hiddenField('product_id',$p->id) ?><?= CHtml::numberField('quantity',1,array('min'=>1,'max'=>min(99,(int)$p->stock),'class'=>'qty-field','aria-label'=>'تعداد')) ?><?= CHtml::submitButton('افزودن به سبد خرید',array('class'=>'btn btn-primary')) ?><?= CHtml::endForm() ?><?php endif; ?>
 <div class="product-tags"><?php foreach($p->tags as $tag) echo CHtml::link('#'.CHtml::encode($tag->name),array('shop/index','tag'=>$tag->slug),array('class'=>'tag','data-pjax'=>'1')).' '; ?></div>
 </div></div>
+<?php $this->widget('ProductAlbums',array('product'=>$p)); ?>
 <div class="detail-sections"><section class="panel"><h2>توضیحات محصول</h2><div class="rich-content"><?= Content::markdown($p->description) ?></div></section>
 <?php if($p->specifications): ?><section class="panel"><h2>مشخصات فنی</h2><div class="spec-table">
 <?php foreach($p->specifications as $s): ?><div class="spec-row"><strong><?= CHtml::encode($s->name) ?></strong><span><?= CHtml::encode($s->value) ?></span></div><?php endforeach; ?>

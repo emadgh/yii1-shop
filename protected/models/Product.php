@@ -21,6 +21,7 @@ class Product extends BaseRecord
     ); }
     public function relations() { return array(
       'category'=>array(self::BELONGS_TO,'Category','category_id'),
+      'albums'=>array(self::HAS_MANY,'ProductAlbum','product_id','order'=>'albums.sort_order ASC, albums.id ASC'),
       'images'=>array(self::HAS_MANY,'ProductImage','product_id','order'=>'images.sort_order ASC, images.id ASC'),
       'specifications'=>array(self::HAS_MANY,'ProductAttribute','product_id','order'=>'specifications.sort_order ASC'),
       'metadata'=>array(self::HAS_MANY,'ProductMeta','product_id','order'=>'metadata.meta_key ASC'),
