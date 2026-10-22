@@ -5,7 +5,7 @@ class CompanyCatalogService
     public static function save($model, $attributes, $imageId, $pdfId)
     {
         if (!is_array($attributes)) throw new CException('اطلاعات کاتالوگ معتبر نیست.');
-        $db=Yii::app()->db;$tx=$db->beginTransaction();
+        $db=Yii::app()->db;$tx=TransactionScope::begin();
         try {
             $model->attributes=$attributes;
             $images=MediaService::selected($imageId, true, 1);

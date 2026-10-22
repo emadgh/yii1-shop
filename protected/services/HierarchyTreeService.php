@@ -9,7 +9,7 @@ class HierarchyTreeService {
  public function revision($rows=null){$rows=$rows===null?$this->rows():$rows;$state=array();foreach($rows as $row)$state[]=array((int)$row['id'],(int)$row['parent_id'],(int)$row['sort_order']);return hash('sha256',CJSON::encode($state));}
  public function move($id,$target,$position,$revision){
   if(!in_array($position,array('before','after','inside','root'),true))throw new CHttpException(422,'نوع جابه‌جایی معتبر نیست.');
-  $db=Yii::app()->db;$tx=$db->beginTransaction();
+  $db=Yii::app()->db;$tx=TransactionScope::begin();
   try{
    if($db->driverName==='mysql')$db->createCommand('SELECT id FROM '.$this->table.' ORDER BY id FOR UPDATE')->queryAll();else $db->createCommand('UPDATE '.$this->table.' SET sort_order=sort_order')->execute();
    $rows=$this->rows();if(!is_string($revision)||!hash_equals($this->revision($rows),$revision))throw new CHttpException(409,'ساختار درخت تغییر کرده است؛ درخت را تازه و دوباره جابه‌جا کنید.');

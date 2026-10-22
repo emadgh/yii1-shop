@@ -16,3 +16,4 @@
 !.env.example
 
 /protected/config/security.key
+/protected/config/ai-client.json

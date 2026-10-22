@@ -39,7 +39,7 @@ $cs->registerScriptFile(Yii::app()->baseUrl.'/assets/js/pjax.js',CClientScript::
   <?= $adminLink('▧ کتابخانه رسانه',array('adminMedia/index'),array('data-pjax'=>'1')) ?>
   <?= $adminLink('⚙ تنظیمات',array('adminSettings/index'),array('data-pjax'=>'1')) ?>
   <?php if(AccessService::isSuperAdmin()): ?><?= $adminLink('◐ مدیریت قالب‌ها',array('adminTheme/index'),array('data-pjax'=>'1')) ?><?php endif; ?>
-  <?php if(AccessService::isSuperAdmin()): ?><?= $adminLink('تغییر آدرس صفحات',array('adminSeo/index'),array('data-pjax'=>'1')) ?><?= $adminLink('کاربران مدیریت',array('adminUser/index'),array('data-pjax'=>'1')) ?><?= $adminLink('عملیات و تاریخچه',array('adminOperations/index'),array('data-pjax'=>'1')) ?><?php endif; ?><?= $adminLink('امنیت حساب',array('adminSecurity/index'),array('data-pjax'=>'1')) ?><div class="side-section">میانبرها</div>
+  <?php if(AccessService::isSuperAdmin()): ?><?= $adminLink('تغییر آدرس صفحات',array('adminSeo/index'),array('data-pjax'=>'1')) ?><?= $adminLink('کاربران مدیریت',array('adminUser/index'),array('data-pjax'=>'1')) ?><?= $adminLink('عملیات و تاریخچه',array('adminOperations/index'),array('data-pjax'=>'1')) ?><?php endif; ?><?php if(AccessService::isSuperAdmin()): ?><?= $adminLink('دسترسی AI و API',array('adminApi/index'),array('data-no-pjax'=>'1')) ?><?php endif; ?><?= $adminLink('امنیت حساب',array('adminSecurity/index'),array('data-pjax'=>'1')) ?><div class="side-section">میانبرها</div>
   <?= $adminLink('↗ مشاهده فروشگاه',array('site/index'),array('data-no-pjax'=>'1')) ?>
   <?= CHtml::beginForm(array('site/logout'),'post',array('class'=>'logout-form')) ?><?= CHtml::submitButton('خروج از حساب',array('class'=>'logout-btn')) ?><?= CHtml::endForm() ?>
 </aside>

@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "bazaarche": {
+      "command": "node",
+      "args": ["/absolute/path/to/yii1-shop/integrations/ai/mcp-server.mjs"],
+      "env": {
+        "BAZAARCHE_TOKEN_FILE": "/absolute/path/to/private/ai-client.json"
+      }
+    }
+  }
+}

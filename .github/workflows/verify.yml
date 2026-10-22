@@ -36,7 +36,7 @@ jobs:
           php tools/install.php
           php tools/seed.php
       - run: find protected tools public -name '*.php' -not -path '*/runtime/*' -print0 | xargs -0 -n1 php -l
-      - run: php tools/verify-catalogs-cache.php && php tools/verify-architecture.php && php tools/verify-commerce.php && php tools/verify-cms.php && php tools/verify-admin-tables.php && php tools/verify-category-tree.php && php tools/verify-hierarchy.php && php tools/verify-albums.php && php tools/verify-login-challenge.php && php tools/verify-jalali.php
+      - run: php tools/verify-api.php && php tools/verify-catalogs-cache.php && php tools/verify-architecture.php && php tools/verify-commerce.php && php tools/verify-cms.php && php tools/verify-admin-tables.php && php tools/verify-category-tree.php && php tools/verify-hierarchy.php && php tools/verify-albums.php && php tools/verify-login-challenge.php && php tools/verify-jalali.php
       - run: npm ci && npx playwright install --with-deps chromium
       - run: npm run test:race
       - run: npm run test:browser

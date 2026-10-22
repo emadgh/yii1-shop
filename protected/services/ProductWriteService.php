@@ -12,7 +12,7 @@ class ProductWriteService
             return false;
         }
 
-        $transaction = Yii::app()->db->beginTransaction();
+        $transaction = TransactionScope::begin();
         $isNew = $product->isNewRecord;
         try {
             $oldStock = $isNew ? 0 : ProductRepository::lockStock($product->id);
@@ -47,7 +47,7 @@ class ProductWriteService
 
     public static function delete($product)
     {
-        $transaction = Yii::app()->db->beginTransaction();
+        $transaction = TransactionScope::begin();
         try {
             ProductRepository::lockStock($product->id);
             if (Product::model()->countByAttributes(array('parent_product_id' => $product->id))) {

@@ -17,6 +17,6 @@ class ThemeOptions {
    $limit=(int)($block['item_limit']??8);$position=(int)($block['sort_order']??$i);if($limit<1 || $limit>24 || $position<0 || $position>1000)throw new Exception('تعداد کالا باید بین ۱ تا ۲۴ و ترتیب بین ۰ تا ۱۰۰۰ باشد.');
    $validated[]=array('theme_key'=>$key,'block_type'=>$type,'title'=>$title,'collection_id'=>$collection?:null,'presentation'=>$presentation,'card_style'=>$style,'item_limit'=>$limit,'sort_order'=>$position,'is_enabled'=>empty($block['is_enabled'])?0:1);
   }
-  $db=Yii::app()->db;$tx=$db->beginTransaction();try{ShopSettings::set('theme_options_'.$key,CJSON::encode($options));$db->createCommand()->delete('theme_blocks','theme_key=:key',array(':key'=>$key));foreach($validated as $block)$db->createCommand()->insert('theme_blocks',$block);$tx->commit();}catch(Exception $e){if($tx->active)$tx->rollback();throw $e;}
+  $db=Yii::app()->db;$tx=TransactionScope::begin();try{ShopSettings::set('theme_options_'.$key,CJSON::encode($options));$db->createCommand()->delete('theme_blocks','theme_key=:key',array(':key'=>$key));foreach($validated as $block)$db->createCommand()->insert('theme_blocks',$block);$tx->commit();}catch(Exception $e){if($tx->active)$tx->rollback();throw $e;}
  }
 }
