@@ -4,6 +4,7 @@ $adminLink=function($label,$route,$options=array()){return AccessService::canRou
 JalaliDate::assets();
 $cs->registerCssFile(Yii::app()->baseUrl.'/assets/css/app.css');
 $cs->registerCssFile(Yii::app()->baseUrl.'/assets/css/modern.css');
+$cs->registerCssFile(Yii::app()->baseUrl.'/assets/css/sidebar.css');
 $cs->registerCssFile(Yii::app()->baseUrl.'/assets/css/cms.css');
 $cs->registerCssFile(Yii::app()->baseUrl.'/assets/css/async.css');
 $cs->registerCssFile(Yii::app()->baseUrl.'/assets/css/admin-tables.css');
