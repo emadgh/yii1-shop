@@ -31,6 +31,18 @@ class CatalogQuery
     {
         $product = Product::model()->with('images', 'category', 'tags', 'specifications', 'metadata')
             ->findByAttributes(array('slug' => $slug, 'status' => 'published'));
+        return self::detailData($product);
+    }
+
+    /** Only the authenticated product administration controller exposes this read. */
+    public static function preview($id)
+    {
+        $product=Product::model()->with('images','category','tags','specifications','metadata')->findByPk($id);
+        return self::detailData($product);
+    }
+
+    private static function detailData($product)
+    {
         if (!$product) {
             throw new CHttpException(404, 'مورد درخواستی پیدا نشد.');
         }

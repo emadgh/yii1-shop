@@ -29,9 +29,14 @@ class AdminProductController extends AdminController
         if (isset($_POST['Product'])) {
             try {
                 $input->load($_POST);
+                $intent=Yii::app()->request->getPost('save_intent');
+                if($intent!==null){
+                    if(!is_string($intent)||!in_array($intent,array('draft','published'),true))throw new CHttpException(400,'عملیات ذخیره معتبر نیست.');
+                    $input->productAttributes['status']=$intent;
+                }
                 if (ProductWriteService::save($product, $input)) {
-                    $this->flash('محصول ذخیره شد.');
-                    $this->redirect(array('adminProduct/index'));
+                    $this->flash($product->status==='published'?'محصول منتشر شد.':'پیش‌نویس محصول ذخیره شد.');
+                    $this->redirect($intent===null?array('adminProduct/index'):array('adminProduct/update','id'=>$product->id));
                     return;
                 }
             } catch (Exception $exception) {
@@ -46,6 +51,17 @@ class AdminProductController extends AdminController
             'templates' => ProductTemplateQuery::options(),
             'templateName'=>$templateName,
         )));
+    }
+
+    public function actionPreview($id)
+    {
+        header('Cache-Control: private, no-store');
+        header('X-Robots-Tag: noindex, nofollow');
+        $data=CatalogQuery::preview($id);
+        $this->layout='//layouts/main';
+        $this->pageTitle='پیش‌نمایش: '.$data['product']->title;
+        $data['isPreview']=true;
+        $this->render('//shop/view',$data);
     }
 
     public function actionTemplate($id=null)
