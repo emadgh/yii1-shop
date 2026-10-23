@@ -7,7 +7,7 @@ class AdminPostController extends AdminController {
    $error='';$tagsText=$model->isNewRecord?'':implode(', ',array_map(function($t){return $t->name;},$model->tags));$selected=$model->cover_image?Yii::app()->db->createCommand('SELECT id FROM media WHERE filename=:p')->queryScalar(array(':p'=>$model->cover_image)):'';
    if(isset($_POST['Post']) && is_array($_POST['Post'])){
      $model->attributes=$_POST['Post'];$tagsText=(string)Yii::app()->request->getPost('tags','');$selected=(string)Yii::app()->request->getPost('cover_media','');
-     try { PostWriteService::save($model,$_POST['Post'],$tagsText,$selected);$this->flash('نوشته ذخیره شد.');$this->redirect(array('adminPost/index'));
+     try { PostWriteService::save($model,$_POST['Post'],$tagsText,$selected,Yii::app()->request->getPost('media_context',''));$this->flash('نوشته ذخیره شد.');$this->redirect(array('adminPost/index'));
      }catch(Exception $e){$error=$e->getMessage();}
    }
    $this->pageTitle=$model->isNewRecord?'نوشته جدید':'ویرایش نوشته';$this->render('//admin/posts/form',compact('model','tagsText','selected','error'));

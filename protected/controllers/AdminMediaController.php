@@ -4,10 +4,10 @@ class AdminMediaController extends AdminController {
  public function actionIndex() { $this->pageTitle='کتابخانه رسانه';$this->render('//admin/media/index'); }
  public function actionList() {
    $q=mb_substr(trim((string)Yii::app()->request->getQuery('q','')),0,100);$offset=max(0,(int)Yii::app()->request->getQuery('offset',0));
-   $rows=MediaRepository::library($q,$offset,(string)Yii::app()->request->getQuery('accept','*'),(string)Yii::app()->request->getQuery('scope','all'));$this->json(array('items'=>array_map(array('MediaService','describe'),$rows),'hasMore'=>count($rows)===48));
+   $rows=MediaRepository::library($q,$offset,(string)Yii::app()->request->getQuery('accept','*'),(string)Yii::app()->request->getQuery('scope','all'),Yii::app()->request->getQuery('context',''));$this->json(array('items'=>array_map(array('MediaService','describe'),$rows),'hasMore'=>count($rows)===48));
  }
  public function actionUpload() {
-   $this->requirePost();try { $file=CUploadedFile::getInstanceByName('file');if(!$file || $file->hasError)throw new Exception('فایل دریافت نشد.');$row=MediaService::ingest($file->tempName,$file->name,Yii::app()->request->getPost('scope','general'),Yii::app()->request->getPost('accept','*'));$this->json(array('ok'=>true,'item'=>MediaService::describe($row))); }catch(Exception $e){$this->json(array('ok'=>false,'error'=>$e->getMessage()),422);}
+   $this->requirePost();try { $file=CUploadedFile::getInstanceByName('file');if(!$file || $file->hasError)throw new Exception('فایل دریافت نشد.');$row=MediaService::ingest($file->tempName,$file->name,Yii::app()->request->getPost('scope','general'),Yii::app()->request->getPost('accept','*'),Yii::app()->request->getPost('context',''));$this->json(array('ok'=>true,'item'=>MediaService::describe($row))); }catch(Exception $e){$this->json(array('ok'=>false,'error'=>$e->getMessage()),422);}
  }
  public function actionDelete($id) {
    $this->requirePost();try{MediaDeleteService::delete((int)$id);$this->json(array('ok'=>true));}catch(Exception $e){$this->json(array('ok'=>false,'error'=>$e->getMessage()),422);}

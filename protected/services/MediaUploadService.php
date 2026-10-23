@@ -2,8 +2,9 @@
 /** Validates files, builds variants and cleans them up if metadata persistence fails. */
 class MediaUploadService
 {
-    public static function ingest($temporaryFile, $name, $scope='general', $accept='*')
+    public static function ingest($temporaryFile, $name, $scope='general', $accept='*', $context='')
     {
+        if($context!=='')$context=MediaContextService::validate($context);
         if (!in_array($scope, array('general','catalogs'), true) || !is_string($accept)) throw new Exception('بخش آپلود معتبر نیست.');
         $size = filesize($temporaryFile);
         if (!$size || $size > 10 * 1024 * 1024) {
@@ -73,7 +74,7 @@ class MediaUploadService
         try {
             return MediaRepository::insert(array('filename' => $filename,
                 'original_name' => mb_substr(basename($name), 0, 240), 'mime' => $mime,
-                'size' => $size, 'width' => $width, 'height' => $height, 'upload_scope'=>$scope,
+                'size' => $size, 'width' => $width, 'height' => $height, 'upload_scope'=>$scope, 'upload_context'=>$context,
                 'variants' => CJSON::encode($variants), 'created_at' => date('Y-m-d H:i:s')));
         } catch (Exception $exception) {
             self::removeFiles($filename, $variants);

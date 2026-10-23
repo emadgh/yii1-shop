@@ -2,9 +2,9 @@
 /** Compatibility facade: upload, reads and image formatting have separate owners. */
 class MediaService
 {
-    public static function ingest($temp, $name, $scope='general', $accept='*')
+    public static function ingest($temp, $name, $scope='general', $accept='*', $context='')
     {
-        return MediaUploadService::ingest($temp, $name, $scope, $accept);
+        return MediaUploadService::ingest($temp, $name, $scope, $accept, $context);
     }
 
     public static function removeFiles($filename, $variants)

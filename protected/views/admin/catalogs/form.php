@@ -1,6 +1,6 @@
 <div class="admin-page-head"><h1>ویرایش کاتالوگ</h1><?= CHtml::link('بازگشت',array('adminCatalog/index'),array('class'=>'btn btn-outline','data-pjax'=>'1')) ?></div>
 <?php if($error): ?><div class="flash flash-error"><?= CHtml::encode($error) ?></div><?php endif; ?>
-<?php $form=$this->beginWidget('CActiveForm'); ?><?= $form->errorSummary($model) ?>
+<?php $mediaContext=MediaContextService::forForm('catalog',$model->isNewRecord?null:$model->id,Yii::app()->request->getPost('media_context'));$form=$this->beginWidget('CActiveForm',array('htmlOptions'=>array('data-media-context'=>$mediaContext))); ?><?= CHtml::hiddenField('media_context',$mediaContext) ?><?= $form->errorSummary($model) ?>
 <section class="panel"><div class="form-row"><div class="field"><?= $form->labelEx($model,'title') ?><?= $form->textField($model,'title',array('maxlength'=>180,'required'=>true)) ?></div><div class="field"><?= $form->labelEx($model,'sort_order') ?><?= $form->numberField($model,'sort_order',array('min'=>0,'max'=>99999)) ?></div></div>
 <div class="field"><?= $form->labelEx($model,'description') ?><?= $form->textArea($model,'description',array('class'=>'markdown-editor','rows'=>6,'data-upload-scope'=>'catalogs')) ?></div>
 <div class="check-field"><?= $form->checkBox($model,'is_active') ?><?= $form->label($model,'is_active') ?></div></section>

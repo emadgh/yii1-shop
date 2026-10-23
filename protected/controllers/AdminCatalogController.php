@@ -19,7 +19,7 @@ class AdminCatalogController extends AdminController
         $error='';
         if (isset($_POST['CompanyCatalog'])) {
             try {
-                CompanyCatalogService::save($model, $_POST['CompanyCatalog'], Yii::app()->request->getPost('image_id',''), Yii::app()->request->getPost('pdf_id',''));
+                CompanyCatalogService::save($model, $_POST['CompanyCatalog'], Yii::app()->request->getPost('image_id',''), Yii::app()->request->getPost('pdf_id',''),Yii::app()->request->getPost('media_context',''));
                 $this->flash('کاتالوگ ذخیره شد.');
                 $this->redirect(array('adminCatalog/index'));
             } catch (Exception $exception) { $error=$exception->getMessage(); }

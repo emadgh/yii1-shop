@@ -31,6 +31,7 @@ class ProductWriteService
             if ($input->editAlbums) {
                 ProductAlbumService::save($product, $albums, $isNew ? null : $input->albumRevision);
             }
+            MediaContextService::claim($input->mediaContext,'product',$product->id);
             $transaction->commit();
             return true;
         } catch (Exception $error) {

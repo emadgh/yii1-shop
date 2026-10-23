@@ -68,7 +68,7 @@ function editor(textarea){
  function insert(before,after){var start=textarea.selectionStart,end=textarea.selectionEnd,selected=textarea.value.slice(start,end);textarea.setRangeText(before+(selected||'متن')+(after||''),start,end,'select');textarea.focus();}
  [['B','متن پررنگ','**','**'],['I','متن مورب','*','*'],['H2','عنوان','\n## ',''],['≡','فهرست','\n- ',''],['❞','نقل قول','\n> ','']].forEach(function(x){var b=document.createElement('button');b.type='button';b.textContent=x[0];b.title=x[1];b.setAttribute('aria-label',x[1]);b.onclick=function(){insert(x[2],x[3]);};tools.append(b);});
  var link=document.createElement('button');link.type='button';link.textContent='پیوند';link.onclick=async function(){var url=await ShopUI.prompt('آدرس پیوند را وارد کنید','https://');if(url&&/^https?:\/\//i.test(url))insert('[',']('+url+')');};tools.append(link);
- var media=document.createElement('button');media.type='button';media.textContent='رسانه';media.onclick=function(){openMedia({multiple:false,accept:'image/*,application/pdf,text/plain',scope:textarea.dataset.uploadScope,ids:[],onApply:function(rows){if(rows[0])insert(rows[0].mime.indexOf('image/')===0?'![':'[',']('+rows[0].url+')');}});};tools.append(media);
+ var media=document.createElement('button');media.type='button';media.textContent='رسانه';media.onclick=function(){openMedia({multiple:false,accept:'image/*,application/pdf,text/plain',scope:textarea.dataset.uploadScope,context:mediaContext(textarea),ids:[],onApply:function(rows){if(rows[0])insert(rows[0].mime.indexOf('image/')===0?'![':'[',']('+rows[0].url+')');}});};tools.append(media);
  var toggle=document.createElement('button');toggle.type='button';toggle.textContent='پیش‌نمایش';toggle.className='preview-toggle';toggle.onclick=async function(){if(!preview.hidden){preview.hidden=true;textarea.hidden=false;toggle.textContent='پیش‌نمایش';return;}try{var r=await api('/adminMedia/preview',{text:textarea.value},box);preview.innerHTML=r.html;preview.hidden=false;textarea.hidden=true;toggle.textContent='ویرایش';}catch(e){ShopUI.toast(e.message,'error');}};tools.append(toggle);
  var hint=document.createElement('small');hint.className='editor-hint';hint.textContent='Markdown · متن پررنگ، عنوان، فهرست، پیوند و تصویر؛ همراه با پیش‌نمایش';box.append(hint);
 }
@@ -76,7 +76,7 @@ document.addEventListener('click',function(e){
  var add=e.target.closest('[data-add-pair]');
  if(add){var box=add.closest('.pair-editor'),rows=box.querySelector('.pair-rows'),index=Date.now().toString()+Math.floor(Math.random()*10000),row=document.createElement('div');row.className='pair-row';['key','value'].forEach(function(k){var input=document.createElement('input');input.name=box.dataset.name+'['+index+']['+k+']';input.maxLength=k==='key'?100:2000;input.placeholder=k==='key'?'نام مشخصه':'مقدار';input.setAttribute('aria-label',input.placeholder);row.append(input);});var b=document.createElement('button');b.type='button';b.className='icon-button';b.dataset.removePair='';b.setAttribute('aria-label','حذف ردیف');b.textContent='×';row.append(b);rows.append(row);row.querySelector('input').focus();}
  var remove=e.target.closest('[data-remove-pair]');if(remove)remove.closest('.pair-row').remove();
- var open=e.target.closest('[data-open-media]');if(open){var picker=open.closest('.media-picker');openMedia({multiple:picker.dataset.multiple==='1',accept:picker.dataset.accept,scope:picker.dataset.scope,ids:picker.querySelector('.media-value').value.split(',').filter(Boolean),onApply:function(rows){picker.querySelector('.media-value').value=rows.map(function(r){return r.id;}).join(',');renderSelection(picker.querySelector('.media-selection'),rows);picker.querySelector('.media-value').dispatchEvent(new Event('change',{bubbles:true}));}});}
+ var open=e.target.closest('[data-open-media]');if(open){var picker=open.closest('.media-picker');openMedia({multiple:picker.dataset.multiple==='1',accept:picker.dataset.accept,scope:picker.dataset.scope,context:mediaContext(picker),ids:picker.querySelector('.media-value').value.split(',').filter(Boolean),onApply:function(rows){picker.querySelector('.media-value').value=rows.map(function(r){return r.id;}).join(',');renderSelection(picker.querySelector('.media-selection'),rows);picker.querySelector('.media-value').dispatchEvent(new Event('change',{bubbles:true}));}});}
  var clear=e.target.closest('[data-clear-media]');if(clear){var picker=clear.closest('.media-picker');picker.querySelector('.media-value').value='';picker.querySelector('.media-selection').replaceChildren();picker.querySelector('.media-value').dispatchEvent(new Event('change',{bubbles:true}));}
  if(e.target.closest('[data-library-open]'))openMedia({multiple:true,accept:'*',ids:[],library:true,onApply:function(){}});
  if(e.target.closest('[data-close-media]'))document.getElementById('media-dialog').close();
@@ -85,18 +85,21 @@ document.addEventListener('click',function(e){
 document.addEventListener('change',function(e){if(e.target.matches('[data-discount-kind]')){var input=e.target.closest('form').querySelector('[data-discount-amount]');input.classList.toggle('money-input',e.target.value==='fixed');formatMoney(input);if(e.target.value!=='fixed')input.value=input.value.replace(/,/g,'');}});
 document.addEventListener('submit',function(e){
  var form=e.target;
+ if(form.dataset.mediaContext&&uploadJobs.some(function(job){return job.context===form.dataset.mediaContext&&['queued','uploading'].includes(job.status);})){e.preventDefault();e.stopImmediatePropagation();ShopUI.toast('ابتدا منتظر پایان آپلودها بمانید یا فایل‌های در صف را حذف کنید.','error');return;}
  if(form.hasAttribute('data-confirm')&&!form.dataset.confirmed){e.preventDefault();e.stopImmediatePropagation();var submitter=e.submitter;ShopUI.confirm(form.dataset.confirm).then(function(ok){if(ok){form.dataset.confirmed='1';form.requestSubmit(submitter);delete form.dataset.confirmed;}});return;}
  if(!form.hasAttribute('data-cart-form')&&!e.defaultPrevented&&form.method.toUpperCase()==='POST'&&!(form.dataset.pjaxForm==='1'&&window.ShopPjax)){nativeBusyReleases.push(ShopUI.busy(form.closest('[data-pjax-region],.panel')||form,'در حال ثبت…'));ShopUI.progress(true);}
 },true);
 window.addEventListener('beforeunload',function(){ShopUI.progress(true);});
 window.addEventListener('pageshow',function(){nativeBusyReleases.splice(0).forEach(function(release){release();});pending=0;ShopUI.progress(false);});
 document.addEventListener('yii-store:pjax-loaded',init);
-var mediaState,mediaRequest=0,mediaSearchTimer;
+var mediaState,mediaRequest=0,mediaSearchTimer,uploadJobs=[],uploadRunning=false,uploadCounter=0;
+function mediaContext(element){var form=element.closest('[data-media-context]');return form?form.dataset.mediaContext:'';}
+
 function accepts(row,accept){return !accept||accept==='*'||accept.split(',').some(function(x){x=x.trim();return x==='image/*'?row.mime.indexOf('image/')===0:row.mime===x;});}
 function renderSelection(target,rows){target.replaceChildren();rows.forEach(function(r){var card=document.createElement('div');card.className='selected-media';card.dataset.id=r.id;if(r.thumb){var img=document.createElement('img');img.src=r.thumb;img.alt=r.original_name;card.append(img);}else card.textContent=r.mime==='application/pdf'?'PDF':'TXT';var name=document.createElement('small');name.textContent=r.original_name;card.append(name);target.append(card);});}
 function openMedia(options){
- mediaState={multiple:!!options.multiple,accept:options.accept,ids:options.ids.map(String),selected:new Map(),onApply:options.onApply,library:options.library,offset:0,q:'',uploadScope:options.scope==='catalogs'?'catalogs':'general',scope:options.scope==='catalogs'?'catalogs':'all'};
- var dialog=document.getElementById('media-dialog');dialog.querySelector('h2').textContent=options.library?'مدیریت رسانه‌ها':'انتخاب رسانه';document.getElementById('media-apply').textContent=options.library?'بستن کتابخانه':'استفاده از انتخاب‌ها';document.getElementById('media-search').value='';document.getElementById('media-upload').accept=options.accept==='*'?'image/jpeg,image/png,image/webp,application/pdf,text/plain':options.accept;document.getElementById('media-feedback').textContent='';var tabs=document.getElementById('media-scopes');tabs.hidden=mediaState.uploadScope!=='catalogs';tabs.querySelectorAll('[data-media-scope]').forEach(function(b){b.setAttribute('aria-selected',String(b.dataset.mediaScope===mediaState.scope));});dialog.showModal();loadMedia(true);
+ mediaState={multiple:!!options.multiple,accept:options.accept,ids:options.ids.map(String),selected:new Map(),onApply:options.onApply,library:options.library,context:options.context||'',offset:0,q:'',uploadScope:options.scope==='catalogs'?'catalogs':'general',scope:options.scope==='catalogs'?'catalogs':'all'};
+ var dialog=document.getElementById('media-dialog');dialog.querySelector('h2').textContent=options.library?'مدیریت رسانه‌ها':'انتخاب رسانه';document.getElementById('media-apply').textContent=options.library?'بستن کتابخانه':'استفاده از انتخاب‌ها';document.getElementById('media-search').value='';document.getElementById('media-upload').accept=options.accept==='*'?'image/jpeg,image/png,image/webp,application/pdf,text/plain':options.accept;document.getElementById('media-feedback').textContent='';var tabs=document.getElementById('media-scopes');tabs.hidden=!mediaState.context&&mediaState.uploadScope!=='catalogs';tabs.querySelector('[data-media-scope=catalogs]').hidden=mediaState.uploadScope!=='catalogs';var ownTab=tabs.querySelector('[data-media-scope=context]');ownTab.hidden=!mediaState.context;ownTab.textContent=mediaState.context.startsWith('product:')?'آپلودهای همین محصول':mediaState.context.startsWith('post:')?'آپلودهای همین نوشته':'آپلودهای همین کاتالوگ';tabs.querySelectorAll('[data-media-scope]').forEach(function(b){b.setAttribute('aria-selected',String(b.dataset.mediaScope===mediaState.scope));});dialog.showModal();renderUploadQueue();loadMedia(true);
 }
 window.MediaLibrary={open:openMedia};
 function updateCount(){document.getElementById('media-count').textContent=mediaState.ids.length+' فایل انتخاب شده · '+(mediaState.multiple?'چند انتخاب':'یک انتخاب');}
@@ -112,23 +115,50 @@ function mediaCard(r,overview){
 }
 async function loadMedia(reset){
  var state=mediaState,request=++mediaRequest,grid=document.getElementById('media-grid');if(reset){state.offset=0;grid.replaceChildren();grid.setAttribute('aria-busy','true');}
- try{var response=await api('/adminMedia/list?q='+encodeURIComponent(state.q)+'&offset='+state.offset+'&accept='+encodeURIComponent(state.accept||'*')+'&scope='+state.scope,null,document.querySelector('.media-library-scroll'));if(request!==mediaRequest||state!==mediaState)return;
+ try{var response=await api('/adminMedia/list?q='+encodeURIComponent(state.q)+'&offset='+state.offset+'&accept='+encodeURIComponent(state.accept||'*')+'&scope='+state.scope+'&context='+encodeURIComponent(state.context),null,document.querySelector('.media-library-scroll'));if(request!==mediaRequest||state!==mediaState)return;
  response.items.forEach(function(r){state.selected.set(String(r.id),r);if(accepts(r,state.accept)||state.library)grid.append(mediaCard(r,false));});state.offset+=response.items.length;document.getElementById('media-more').hidden=!response.hasMore;
  if(!grid.children.length){var empty=document.createElement('p');empty.className='media-empty';empty.textContent='رسانه‌ای پیدا نشد. فایل جدید آپلود کنید.';grid.append(empty);}updateCount();
  }catch(e){ShopUI.toast(e.message,'error');}finally{grid.removeAttribute('aria-busy');}
 }
-async function uploadFiles(files){
- if(!mediaState)return;var list=Array.from(files),feedback=document.getElementById('media-feedback'),state=mediaState;var count=0;
- for(var file of list){if(file.size>10*1024*1024){ShopUI.toast(file.name+': بیش از ۱۰ مگابایت','error');continue;}feedback.textContent='آپلود '+file.name+' ('+(++count)+' از '+list.length+')';
- try{var form=new FormData();form.append('file',file);form.append('scope',state.uploadScope);form.append('accept',state.accept||'*');var result=await api('/adminMedia/upload',form,document.getElementById('media-drop'));var row=result.item;if(state===mediaState&&accepts(row,state.accept)){state.selected.set(String(row.id),row);if(state.multiple&&state.ids.length<20)state.ids.push(String(row.id));else if(!state.multiple)state.ids=[String(row.id)];}}catch(e){ShopUI.toast(file.name+': '+e.message,'error');}}
- feedback.textContent='آپلودها پردازش شدند.';if(state===mediaState)loadMedia(true);loadOverview();
+function renderUploadQueue(){
+ var target=document.getElementById('media-upload-queue');if(!target)return;target.replaceChildren();
+ var jobs=mediaState?uploadJobs.filter(function(job){return job.state===mediaState;}):[];target.hidden=!jobs.length;
+ jobs.forEach(function(job){var card=document.createElement('div');card.className='media-upload-job';card.dataset.uploadJob=job.id;card.dataset.uploadStatus=job.status;
+ var preview=job.preview||(job.row&&job.row.thumb);if(preview){var img=document.createElement('img');img.src=preview;img.alt=job.name;card.append(img);}else{var icon=document.createElement('span');icon.className='file-icon';icon.textContent=job.mime==='application/pdf'?'PDF':'FILE';card.append(icon);}
+ var info=document.createElement('div'),name=document.createElement('strong'),status=document.createElement('span');name.textContent=job.name;
+ status.textContent=job.status==='queued'?'در صف آپلود':job.status==='uploading'?'در حال آپلود · '+job.progress+'٪':job.status==='done'?'آپلود شد':job.error||'آپلود ناموفق';info.append(name,status);
+ if(job.status==='uploading'){var meter=document.createElement('progress');meter.max=100;meter.value=job.progress;meter.setAttribute('aria-label','پیشرفت آپلود '+job.name);info.append(meter);}card.append(info);
+ var remove=document.createElement('button');remove.type='button';remove.className='icon-button';remove.textContent='×';remove.disabled=job.status==='uploading';remove.setAttribute('aria-label',job.status==='queued'?'حذف از صف '+job.name:'بستن وضعیت '+job.name);remove.onclick=function(){disposeUpload(job);uploadJobs=uploadJobs.filter(function(item){return item!==job;});renderUploadQueue();};card.append(remove);target.append(card);});
+}
+function disposeUpload(job){if(job.preview){URL.revokeObjectURL(job.preview);job.preview=null;}job.file=null;}
+function sendUpload(job){return new Promise(function(resolve,reject){
+ var form=new FormData();form.append('file',job.file);form.append('scope',job.state.uploadScope);form.append('accept',job.state.accept||'*');form.append('context',job.context);form.append(csrfName.content,csrf.content);
+ var xhr=new XMLHttpRequest();xhr.open('POST',base+'/adminMedia/upload');xhr.setRequestHeader('X-Requested-With','XMLHttpRequest');xhr.setRequestHeader('Accept','application/json');xhr.timeout=120000;
+ xhr.upload.onprogress=function(event){if(event.lengthComputable){job.progress=Math.round(100*event.loaded/event.total);renderUploadQueue();}};
+ xhr.onload=function(){try{var result=JSON.parse(xhr.responseText);if(xhr.status<200||xhr.status>=300||result.ok===false)throw new Error(result.error||'آپلود ناموفق بود.');resolve(result.item);}catch(error){reject(error);}};
+ xhr.onerror=function(){reject(new Error('ارتباط هنگام آپلود قطع شد.'));};xhr.ontimeout=function(){reject(new Error('زمان آپلود به پایان رسید.'));};xhr.send(form);
+ });}
+async function pumpUploads(){
+ if(uploadRunning)return;uploadRunning=true;
+ try{var job;while((job=uploadJobs.find(function(item){return item.status==='queued';}))){job.status='uploading';renderUploadQueue();ShopUI.progress(true);
+ try{var row=await sendUpload(job);job.row=row;job.status='done';if(job.state===mediaState&&accepts(row,mediaState.accept)){mediaState.selected.set(String(row.id),row);if(mediaState.multiple){if(mediaState.ids.length<20)mediaState.ids.push(String(row.id));}else mediaState.ids=[String(row.id)];}disposeUpload(job);renderUploadQueue();if(job.state===mediaState){updateCount();await loadMedia(true);}loadOverview();}
+ catch(error){job.status='error';job.error=error.message;disposeUpload(job);renderUploadQueue();ShopUI.toast(job.name+': '+error.message,'error');}
+ finally{if(job.state!==mediaState)uploadJobs=uploadJobs.filter(function(item){return item!==job;});ShopUI.progress(false);}}
+ }finally{uploadRunning=false;var feedback=document.getElementById('media-feedback');if(mediaState)feedback.textContent='پردازش صف آپلود پایان یافت.';}
+}
+function uploadFiles(files){
+ if(!mediaState)return;var state=mediaState;
+ Array.from(files).forEach(function(file){if(file.size>10*1024*1024){ShopUI.toast(file.name+': بیش از ۱۰ مگابایت','error');return;}if(uploadJobs.filter(function(j){return ['queued','uploading'].includes(j.status);}).length>=50){ShopUI.toast('حداکثر ۵۰ فایل هم‌زمان در صف قرار می‌گیرد.','error');return;}
+ uploadJobs.push({id:++uploadCounter,state:state,context:state.context,file:file,name:file.name,mime:file.type,status:'queued',progress:0,preview:/^image\/(jpeg|png|webp)$/.test(file.type)?URL.createObjectURL(file):null});});
+ document.getElementById('media-feedback').textContent='فایل‌ها به صف آپلود اضافه شدند.';renderUploadQueue();setTimeout(pumpUploads,0);
 }
 function loadOverview(){var target=document.getElementById('library-overview');if(!target)return;api('/adminMedia/list').then(function(r){target.replaceChildren();r.items.forEach(function(row){target.append(mediaCard(row,true));});}).catch(function(e){ShopUI.toast(e.message,'error');});}
 var dialog=document.getElementById('media-dialog');
 if(dialog){
  document.getElementById('media-scopes').addEventListener('click',function(e){var tab=e.target.closest('[data-media-scope]');if(!tab||!mediaState)return;mediaState.scope=tab.dataset.mediaScope;document.querySelectorAll('[data-media-scope]').forEach(function(b){b.setAttribute('aria-selected',String(b===tab));});loadMedia(true);});
- dialog.addEventListener('close',function(){mediaRequest++;mediaState=null;document.getElementById('media-grid').replaceChildren();});
- document.getElementById('media-search').oninput=function(e){clearTimeout(mediaSearchTimer);mediaSearchTimer=setTimeout(function(){mediaState.q=e.target.value;loadMedia(true);},250);};
+ dialog.addEventListener('close',function(){mediaRequest++;clearTimeout(mediaSearchTimer);var closing=mediaState;uploadJobs=uploadJobs.filter(function(job){if(job.state!==closing||job.status==='uploading')return true;disposeUpload(job);return false;});mediaState=null;renderUploadQueue();document.getElementById('media-grid').replaceChildren();});
+ document.getElementById('media-search').oninput=function(e){clearTimeout(mediaSearchTimer);mediaSearchTimer=setTimeout(function(){if(mediaState){mediaState.q=e.target.value;loadMedia(true);}},250);};
+ document.getElementById('media-deselect').onclick=function(){if(!mediaState)return;mediaState.ids=[];document.querySelectorAll('#media-grid .media-tile-select').forEach(function(button){button.setAttribute('aria-pressed','false');});updateCount();};
  document.getElementById('media-more').onclick=function(){loadMedia(false);};
  document.getElementById('media-upload').onchange=function(e){uploadFiles(e.target.files);e.target.value='';};
  var drop=document.getElementById('media-drop');['dragenter','dragover'].forEach(function(name){dialog.addEventListener(name,function(e){e.preventDefault();drop.classList.add('drag-over');});});dialog.addEventListener('dragleave',function(e){if(!dialog.contains(e.relatedTarget))drop.classList.remove('drag-over');});

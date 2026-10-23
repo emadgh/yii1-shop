@@ -2,13 +2,15 @@
 /** Media reads. The presentation cache lives only for the current PHP request. */
 class MediaRepository
 {
-    public static function library($query='', $offset=0, $accept='*', $scope='all')
+    public static function library($query='', $offset=0, $accept='*', $scope='all', $context='')
     {
         $types=array_map('trim',explode(',',$accept));
-        if (!in_array($scope, array('all','catalogs'), true) || count($types)>10 || array_diff($types,array('*','image/*','image/jpeg','image/png','image/webp','application/pdf','text/plain'))) {
+        if (!in_array($scope, array('all','catalogs','context'), true) || count($types)>10 || array_diff($types,array('*','image/*','image/jpeg','image/png','image/webp','application/pdf','text/plain'))) {
             throw new CHttpException(400,'فیلتر رسانه معتبر نیست.');
         }
         $command=Yii::app()->db->createCommand()->select('*')->from('media')->where('original_name LIKE :q',array(':q'=>'%'.mb_substr(trim($query),0,100).'%'));
+        if($context!=='')$context=MediaContextService::validate($context);
+        if($scope==='context'){if($context==='')throw new CHttpException(400,'بخش رسانه را انتخاب کنید.');$command->andWhere('upload_context=:context',array(':context'=>$context));}
         if ($scope==='catalogs') $command->andWhere('upload_scope=:scope',array(':scope'=>'catalogs'));
         if (!in_array('*',$types,true)) {
             if (in_array('image/*',$types,true)) $types=array_merge(array_diff($types,array('image/*')),array('image/jpeg','image/png','image/webp'));

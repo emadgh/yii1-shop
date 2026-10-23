@@ -10,6 +10,7 @@ class ProductEditForm extends CFormModel
     public $albumRevision = '';
     public $stockSnapshot = 0;
     public $editAlbums = false;
+    public $mediaContext = '';
 
     public function load($post)
     {
@@ -17,6 +18,7 @@ class ProductEditForm extends CFormModel
             throw new CHttpException(400, 'اطلاعات محصول معتبر نیست.');
         }
         $this->productAttributes = $post['Product'];
+        $this->mediaContext = $post['media_context'] ?? '';
         $this->tagsText = $post['tags'] ?? '';
         $this->specs = $post['spec_rows'] ?? array();
         $this->meta = $post['meta_rows'] ?? array();
