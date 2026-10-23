@@ -28,6 +28,15 @@ class HomePageQuery
                     CatalogQuery::primeProducts($products);
                     $data += array('collection' => $collection, 'products' => $products);
                     break;
+                case 'latest_products':
+                case 'popular_products':
+                case 'category_products':
+                    $category=$block['block_type']==='category_products'?Category::model()->findByPk($block['category_id']??0):null;
+                    if($block['block_type']==='category_products'&&!$category)continue 2;
+                    $data['products']=ProductFeedQuery::products($block['block_type'],$block['item_limit'],$category?$category->id:null);
+                    $data['title']=$category?$category->name:($block['block_type']==='latest_products'?'آخرین محصولات':'پربازدیدترین محصولات');
+                    $data['moreUrl']=$category?array('shop/category','slug'=>$category->slug):($block['block_type']==='latest_products'?array('shop/index'):null);
+                    break;
                 case 'blog':
                     $posts = Post::model()->findAll(array('condition' => "status='published'",
                         'order' => 'created_at DESC', 'limit' => min(6, (int)$block['item_limit'])));
