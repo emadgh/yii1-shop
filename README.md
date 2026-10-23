@@ -26,6 +26,12 @@
 - اگر MySQL استفاده می‌کنید، ترجیحاً MySQL 8 یا MariaDB با InnoDB و `utf8mb4`.
 - دسترسی نوشتن PHP به `protected/runtime`، `public/uploads` و assetهای Yii (پوشه `public/assets`؛ در صورت نیاز برای Yii asset manager).
 
+## نصب روی هاست اشتراکی
+
+نصب‌کننده فارسی `install.php` مشخصات سایت، دیتابیس MySQL، حساب مدیر اصلی و انتخاب داده نمونه را دریافت می‌کند؛ پیش‌نیازها و خالی بودن دیتابیس را بررسی می‌کند و پس از نصب قفل می‌شود. برای بسته آماده بدون نیاز به SSH و Composer روی هاست، `python tools/package-release.py` را روی کامپیوتر توسعه اجرا کنید. راهنمای آپلود، دسترسی‌ها و cron در [INSTALL.md](INSTALL.md) است.
+
+تست نصب تازه روی دیتابیس‌های موقت: `node tools/verify-installer.cjs`؛ حالت اختیاری `--apache` قواعد دسترسی و نصب با مجوز محدود دیتابیس را نیز روی Apache محلی بررسی می‌کند. مسیرها و اطلاعات سرور تست از متغیرهای `SHOP_INSTALL_TEST_HOST`، `SHOP_INSTALL_TEST_USER`، `SHOP_INSTALL_TEST_PASSWORD`، `SHOP_APACHE_ROOT` و `SHOP_APACHE_PHP_ROOT` قابل تنظیم‌اند.
+
 ## نصب ساده (SQLite)
 
 1. مخزن `https://github.com/emadgh/yii1-shop` را clone کنید و وارد آن شوید.

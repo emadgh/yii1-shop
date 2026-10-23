@@ -12,14 +12,18 @@ foreach(array('idx_catalog_public'=>array('company_catalogs','is_active,sort_ord
     $exists=$sqlite?$db->createCommand("SELECT COUNT(*) FROM sqlite_master WHERE type='index' AND name=:name")->queryScalar(array(':name'=>$index)):$db->createCommand('SELECT COUNT(*) FROM information_schema.statistics WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=:table AND INDEX_NAME=:name')->queryScalar(array(':table'=>$definition[0],':name'=>$index));
     if(!$exists)$db->createCommand()->createIndex($index,$definition[0],$definition[1]);
 }
+$cacheReady=true;
 foreach(array('categories','menu_items','products','product_attributes','media','company_catalogs') as $table){
     if(!$db->createCommand('SELECT COUNT(*) FROM cache_versions WHERE scope=:s')->queryScalar(array(':s'=>$table)))$db->createCommand()->insert('cache_versions',array('scope'=>$table,'version'=>1));
     foreach(array('INSERT','UPDATE','DELETE') as $event){
         $name='invalidate_'.$table.'_'.strtolower($event);
         $exists=$sqlite?$db->createCommand("SELECT COUNT(*) FROM sqlite_master WHERE type='trigger' AND name=:n")->queryScalar(array(':n'=>$name)):$db->createCommand('SELECT COUNT(*) FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA=DATABASE() AND TRIGGER_NAME=:n')->queryScalar(array(':n'=>$name));
-        if(!$exists)$db->createCommand("CREATE TRIGGER $name AFTER $event ON $table FOR EACH ROW ".($sqlite?'BEGIN ':'')."UPDATE cache_versions SET version=version+1 WHERE scope='$table'".($sqlite?'; END':''))->execute();
+        if(!$exists)try{$db->createCommand("CREATE TRIGGER $name AFTER $event ON $table FOR EACH ROW ".($sqlite?'BEGIN ':'')."UPDATE cache_versions SET version=version+1 WHERE scope='$table'".($sqlite?'; END':''))->execute();}
+        catch(CDbException $e){if(!$sqlite&&in_array((int)($e->errorInfo[1]??0),array(1142,1227,1419),true))$cacheReady=false;else throw $e;}
     }
 }
+ShopSettings::set('cache_dependencies_ready',$cacheReady?'1':'0');
+if(!$cacheReady)ShopSettings::set('cache_backend','off');
 // New installs and existing stores get a discoverable, editable public catalog link.
 if($newCatalogs&&!$db->createCommand("SELECT COUNT(*) FROM menu_items WHERE url='/catalogs'")->queryScalar())$db->createCommand()->insert('menu_items',array('label'=>'کاتالوگ‌های شرکت','url'=>'/catalogs','location'=>'footer','parent_id'=>null,'sort_order'=>90,'is_active'=>1));
 $db->schema->refresh();

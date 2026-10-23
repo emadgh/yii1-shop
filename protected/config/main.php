@@ -11,6 +11,7 @@ $config=array(
   'defaultController'=>'site',
   'import'=>array('application.models.*','application.components.*','application.repositories.*','application.queries.*','application.services.*','application.forms.*','application.widgets.*'),
   'components'=>array(
+    'assetManager'=>array('basePath'=>$root.'/public/assets'),
     'siteCache'=>array('class'=>'application.components.SiteCache'),
     'db'=>array(
       'connectionString'=>$dsn,

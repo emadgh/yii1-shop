@@ -1,11 +1,11 @@
 <?php
 // Optional sample catalog for a new installation. Does not overwrite existing items.
-if(PHP_SAPI!=='cli') { http_response_code(403); exit; }
+if(PHP_SAPI!=='cli'&&!defined('BAZAARCHE_INSTALL_CONFIG')) { http_response_code(403); exit; }
 $root=dirname(__DIR__);
-$dsn=getenv('SHOP_DSN') ?: 'sqlite:'.$root.'/protected/runtime/store.sqlite';
-$db=new PDO($dsn,getenv('SHOP_DB_USER')?:'',getenv('SHOP_DB_PASSWORD')?:'',array(PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION));
+$dsn=defined('BAZAARCHE_INSTALL_CONFIG')?Yii::app()->db->connectionString:(getenv('SHOP_DSN') ?: 'sqlite:'.$root.'/protected/runtime/store.sqlite');
+$db=defined('BAZAARCHE_INSTALL_CONFIG')?Yii::app()->db->pdoInstance:new PDO($dsn,getenv('SHOP_DB_USER')?:'',getenv('SHOP_DB_PASSWORD')?:'',array(PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION));
 if(strpos($dsn,'sqlite:')===0) $db->exec('PRAGMA foreign_keys=ON');
-if((int)$db->query('SELECT COUNT(*) FROM products')->fetchColumn()>0) { echo "Sample catalog skipped; products already exist.\n"; require __DIR__.'/seed-demo.php'; exit(0); }
+if((int)$db->query('SELECT COUNT(*) FROM products')->fetchColumn()>0) { echo "Sample catalog skipped; products already exist.\n"; require __DIR__.'/seed-demo.php';if(defined('BAZAARCHE_INSTALL_CONFIG'))return; exit(0); }
 $categories=array(
   array('خانه و دکور','home-decor'),array('سبک زندگی','lifestyle'),array('منتخب بازارچه','featured'),
 );
@@ -41,5 +41,5 @@ try {
   $insertPost=$db->prepare('INSERT INTO posts(title,slug,excerpt,body,cover_image,status,seo_title,seo_description,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?)');
   foreach($posts as $p) $insertPost->execute(array($p[0],$p[1],$p[2],$p[3],'','published',$p[0],$p[2],date('Y-m-d H:i:s'),date('Y-m-d H:i:s')));
   $db->commit(); echo "6 demo products, 3 categories and 2 posts added.\n";
-} catch(Exception $e) { $db->rollBack(); fwrite(STDERR,$e->getMessage()."\n");exit(1); }
+} catch(Exception $e) { if($db->inTransaction())$db->rollBack();if(defined('BAZAARCHE_INSTALL_CONFIG'))throw $e; fwrite(STDERR,$e->getMessage()."\n");exit(1); }
 require __DIR__.'/seed-demo.php';

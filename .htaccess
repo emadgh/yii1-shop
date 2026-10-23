@@ -1,0 +1,14 @@
+Options -Indexes
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteRule ^(?:protected|vendor|tools|database|integrations|node_modules)(?:/|$) - [F,L,NC]
+RewriteRule (^|/)\. - [F,L]
+RewriteRule ^(?:composer\.(?:json|lock)|package(?:-lock)?\.json|.*\.(?:sql|sqlite|log|md|toml|py|cjs|mjs))$ - [F,L,NC]
+RewriteRule ^(assets|uploads)/(.*)$ public/$1/$2 [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [L]
+</IfModule>
+<FilesMatch "^(composer\.|package|\.env|\.ht)">
+Require all denied
+</FilesMatch>

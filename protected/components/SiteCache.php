@@ -8,7 +8,7 @@ class SiteCache extends CApplicationComponent
     public function backend()
     {
         $mode = ShopSettings::get('cache_backend', 'db');
-        if ($mode === 'off') return null;
+        if ($mode === 'off' || ShopSettings::get('cache_dependencies_ready','1')==='0') return null;
         $signature = $mode.'|'.Yii::app()->db->connectionString;
         if ($signature !== $this->signature) {
             $config = $mode === 'file'
