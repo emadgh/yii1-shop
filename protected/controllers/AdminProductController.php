@@ -41,7 +41,21 @@ class AdminProductController extends AdminController
             'model' => $product, 'error' => $error,
             'categories' => Category::options(),
             'parentOptions' => ProductEditorQuery::parentOptions($product->id),
+            'templates' => ProductTemplateQuery::options(),
         )));
+    }
+
+    public function actionTemplate($id=null)
+    {
+        header('Cache-Control: no-store');header('Content-Type: application/json; charset=utf-8');
+        try{
+            if(Yii::app()->request->isPostRequest){
+                $this->requirePost();
+                if(Yii::app()->request->getPost('operation')==='delete'){ProductTemplateService::delete($id);echo CJSON::encode(array('ok'=>true));}
+                else{$productId=Yii::app()->request->getPost('product_id');if(!is_scalar($productId)||!ctype_digit((string)$productId)||(int)$productId<1)throw new CHttpException(422,'شناسه محصول معتبر نیست.');$row=ProductTemplateService::capture($this->load($productId),Yii::app()->request->getPost('name'));echo CJSON::encode(array('ok'=>true,'id'=>(int)$row->id,'name'=>$row->name));}
+            }else{echo CJSON::encode(array('ok'=>true,'template'=>ProductTemplateQuery::editorData($id)));}
+        }catch(CHttpException $e){http_response_code($e->statusCode);echo CJSON::encode(array('ok'=>false,'error'=>$e->getMessage()));}
+        Yii::app()->end();
     }
 
     public function actionDelete($id)

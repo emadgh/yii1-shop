@@ -38,3 +38,4 @@ require __DIR__.'/upgrade-albums.php';
 require __DIR__.'/upgrade-catalogs-cache.php';
 
 require __DIR__.'/upgrade-api.php';
+require __DIR__.'/upgrade-product-templates.php';

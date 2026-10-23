@@ -25,7 +25,7 @@ def build(destination):
         if name.startswith('tools/') and path.name not in {
             '.htaccess', 'bootstrap.php', 'upgrade.php', 'seed.php', 'seed-demo.php', 'seed-cms.php',
             'upgrade-cms.php', 'upgrade-shop.php', 'upgrade-albums.php', 'upgrade-catalogs-cache.php', 'upgrade-api.php',
-            'reservations.php', 'notifications.php', 'backup.php', 'restore.php'
+            'reservations.php', 'notifications.php', 'backup.php', 'restore.php', 'upgrade-product-templates.php'
         }:
             continue
         if (ROOT / name).is_file():

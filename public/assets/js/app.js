@@ -55,12 +55,12 @@ function formatMoney(el){var v=digits(el.value).replace(/[,٬\s]/g,'');if(/^\d*$
 document.addEventListener('input',function(e){if(e.target.matches('.money-input'))formatMoney(e.target);});
 function tags(input){
  input.dataset.ready='1';var wrap=document.createElement('div');wrap.className='tag-field';var entry=document.createElement('input');entry.type='text';entry.placeholder='تگ را بنویسید و Enter بزنید';entry.setAttribute('aria-label','تگ جدید');
- input.type='hidden';input.parentNode.insertBefore(wrap,input);var values=input.value.split(/[,،\n]/).map(function(x){return x.trim();}).filter(Boolean);
+ input.type='hidden';input.parentNode.insertBefore(wrap,input);var values=input.value.split(/[,،\/\n]/).map(function(x){return x.trim();}).filter(Boolean);
  var list=document.createElement('div');list.className='tag-chips';wrap.append(list,entry);
  function render(){list.replaceChildren();values.forEach(function(v,i){var chip=document.createElement('span');chip.className='tag-chip';chip.append(document.createTextNode(v));var b=document.createElement('button');b.type='button';b.textContent='×';b.setAttribute('aria-label','حذف '+v);b.onclick=function(){values.splice(i,1);render();};chip.append(b);list.append(chip);});input.value=values.join(', ');}
- function add(){entry.value.split(/[,،]/).forEach(function(v){v=v.trim();if(v && values.indexOf(v)<0 && values.length<30)values.push(v);});entry.value='';render();}
- entry.addEventListener('keydown',function(e){if(['Enter',',','،'].includes(e.key)){e.preventDefault();add();}else if(e.key==='Backspace'&&!entry.value){values.pop();render();}});
- entry.addEventListener('blur',add);entry.addEventListener('paste',function(){setTimeout(function(){if(/[,،]/.test(entry.value))add();},0);});render();
+ function add(){entry.value.split(/[,،\/\n]/).forEach(function(v){v=v.trim();if(v && values.indexOf(v)<0 && values.length<30)values.push(v);});entry.value='';render();}
+ entry.addEventListener('keydown',function(e){if(['Enter',',','،','/'].includes(e.key)){e.preventDefault();add();}else if(e.key==='Backspace'&&!entry.value){values.pop();render();}});
+ input.addEventListener('change',function(){values=input.value.split(/[,،\/\n]/).map(function(v){return v.trim();}).filter(Boolean);render();});entry.addEventListener('input',function(){if(/[,،\/\n]/.test(entry.value))add();});entry.addEventListener('blur',add);entry.addEventListener('paste',function(){setTimeout(function(){if(/[,،\/\n]/.test(entry.value))add();},0);});render();
 }
 function editor(textarea){
  textarea.dataset.ready='1';var box=document.createElement('div');box.className='markdown-box';var tools=document.createElement('div');tools.className='editor-toolbar';textarea.parentNode.insertBefore(box,textarea);box.append(tools,textarea);
