@@ -30,7 +30,7 @@ try {
    foreach(array('site_name'=>'بازارچه','site_description'=>'اشیای ساده برای زندگی روزمره','currency'=>'toman','reservation_minutes'=>'20','schema_version'=>'2') as $key=>$value) $db->createCommand()->insert('settings',array('setting_key'=>$key,'setting_value'=>$value));
  }
  $tx->commit(); echo "Upgrade complete. Existing data preserved.\n";
-} catch(Exception $e) { if($tx && $tx->active)$tx->rollback();if(defined('BAZAARCHE_INSTALL_CONFIG'))throw $e; fwrite(STDERR,$e->getMessage()."\n");exit(1); }
+} catch(Exception $e) { if($tx && $tx->active)$tx->rollback();if(defined('BAZAARCHE_INSTALL_CONFIG')||defined('BAZAARCHE_WEB_UPGRADE'))throw $e; fwrite(STDERR,$e->getMessage()."\n");exit(1); }
 require __DIR__.'/upgrade-cms.php';
 
 require __DIR__.'/upgrade-shop.php';

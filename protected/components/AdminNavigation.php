@@ -35,11 +35,12 @@ class AdminNavigation
                 'adminUser/index'=>'♙ کاربران مدیریت',
                 'adminApi/index'=>'⌘ دسترسی AI و API',
                 'adminOperations/index'=>'≡ عملیات و تاریخچه',
+                'adminUpgrade/index'=>'↑ ارتقای دیتابیس',
                 'adminSecurity/index'=>'⌑ امنیت حساب',
             ),
             'میانبرها'=>array('site/index'=>'↗ مشاهده فروشگاه'),
         );
-        $superOnly=array('adminTheme/index','adminSeo/index','adminUser/index','adminApi/index','adminOperations/index');
+        $superOnly=array('adminTheme/index','adminSeo/index','adminUser/index','adminApi/index','adminOperations/index','adminUpgrade/index');
         $result=array();$super=AccessService::isSuperAdmin();
         foreach($groups as $title=>$items){
             $visible=array();
