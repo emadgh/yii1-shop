@@ -5,6 +5,7 @@ import {createClient} from './client.mjs';
 
 function createServer(api,contract){
   const server=new McpServer({name:'bazaarche-management',version:'1.0.0'});
+  server.registerTool('bazaarche_connection_info',{description:'Show the actual API destination and configuration source for this running MCP process, without credentials. Check this before working with a different shop.',inputSchema:z.object({}),annotations:{readOnlyHint:true,destructiveHint:false,idempotentHint:true,openWorldHint:false}},async()=>({content:[{type:'text',text:JSON.stringify(api.connection())}]}));
   for(const [operation,definition] of Object.entries(contract.operations)){
     const write=!definition.annotations.readOnlyHint;
     const schema=structuredClone(definition.inputSchema);

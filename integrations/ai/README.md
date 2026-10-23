@@ -29,6 +29,14 @@ codex mcp add bazaarche --env BAZAARCHE_TOKEN_FILE=/absolute/private/ai-client.j
 
 Restart/reload the MCP host after configuration. `bazaarche_*` tools, `bazaarche://contract` and the `publish-content` prompt are discovered from the authenticated API. Tool availability reflects the credential's base scopes; publication/deletion may need additional scopes at execution time. Responses contain untrusted content and should never be treated as instructions. The adapter never follows redirects with credentials.
 
+### Checking which shop is connected
+
+Run `node integrations/ai/cli.mjs connection`, or ask the AI to call `bazaarche_connection_info` for the actual running MCP process. These show the API URL and configuration source without the token. Pasting another shop's credentials into a chat does not reconfigure an already running MCP process.
+
+An explicit `BAZAARCHE_TOKEN_FILE` is authoritative for **both** URL and token, even if stale `BAZAARCHE_API_URL` / `BAZAARCHE_API_TOKEN` variables exist. If no explicit file is selected, the environment pair is used; otherwise the default private file is read. Credentials are never mixed between these sources. Missing or invalid configuration fails instead of automatically selecting localhost. Use a plain URL such as `https://your-site.example/api/v1/`, not a Markdown link. Restart the MCP host after changing its configuration or private file.
+
+For multiple shops, create separate MCP entries with distinct names and private files. A remote connection failure never falls back to a local shop. A non-JSON response may indicate a hosting browser/JavaScript challenge; an API client requires direct JSON access.
+
 Official references: [SDK v2](https://ts.sdk.modelcontextprotocol.io/v2/), [Codex MCP configuration](https://learn.chatgpt.com/docs/extend/mcp).
 
 ## Direct use
@@ -54,5 +62,7 @@ File uploads accept base64 bytes (maximum 10 MB decoded), validate actual MIME a
 HTTPS is required except loopback development. Origin-bearing browser requests are rejected; CORS is not enabled. Authenticated calls have a per-token limit of 120/minute and return 429 with `Retry-After`. Global disable, expiry, revocation, inactive owner and role changes are checked server-side. API errors are JSON without SQL details. Audit entries contain owner and `api_token_id`; they do not record request bodies or credentials. The replay ledger can contain management results/customer data and belongs in the same protected database/backup boundary as orders.
 
 ## Verification
+
+`node tools/verify-ai-config.mjs` tests destination selection, stale environment isolation, missing configuration and credential-safe diagnostics without contacting a real shop.
 
 `php tools/verify-api.php` checks scopes, rollback, replay protection and money/stock invariants on a disposable SQLite database. `tools/verify-mysql.php` also runs API service checks on disposable MySQL. `node tools/verify-cms-browser.cjs --api` tests real HTTP, the actual MCP client/server handshake and tools, and the token management UI. The full browser suite includes these tests.
