@@ -4,15 +4,15 @@ class AdminProductController extends AdminController
     public function actionIndex()
     {
         $this->pageTitle = 'مدیریت محصولات';
-        $this->render('//admin/products/index', array('lowStock' => ProductEditorQuery::lowStock()));
+        $this->render('//admin/products/index', array('lowStock' => ProductEditorQuery::lowStock(),'templates'=>ProductTemplateQuery::options()));
     }
 
-    public function actionCreate()
+    public function actionCreate($template=null)
     {
         $product = new Product;
         $product->discount_type = 'none';
         $product->discount_value = $product->price = $product->compare_price = $product->stock = 0;
-        $this->edit($product);
+        $this->edit($product,$template);
     }
 
     public function actionUpdate($id)
@@ -20,9 +20,11 @@ class AdminProductController extends AdminController
         $this->edit($this->load($id));
     }
 
-    private function edit($product)
+    private function edit($product,$template=null)
     {
         $input = ProductEditorQuery::form($product);
+        $templateName='';
+        if($template!==null&&!Yii::app()->request->isPostRequest)$templateName=ProductTemplateService::prefill($product,$input,$template);
         $error = '';
         if (isset($_POST['Product'])) {
             try {
@@ -42,6 +44,7 @@ class AdminProductController extends AdminController
             'categories' => Category::options(),
             'parentOptions' => ProductEditorQuery::parentOptions($product->id),
             'templates' => ProductTemplateQuery::options(),
+            'templateName'=>$templateName,
         )));
     }
 

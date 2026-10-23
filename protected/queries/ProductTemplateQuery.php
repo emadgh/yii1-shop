@@ -11,13 +11,18 @@ class ProductTemplateQuery
         foreach($product->metadata as $row)$meta[]=array('key'=>$row->meta_key,'value'=>$row->meta_value);
         return array('version'=>1,'fields'=>$fields,'tags'=>$product->tagsText(),'specs'=>$specs,'meta'=>$meta);
     }
-    public static function editorData($id)
+    public static function data($id)
     {
         $template=self::find($id);$data=CJSON::decode($template->payload);
-        foreach(array('price','compare_price') as $key)$data['fields'][$key]=Money::input($data['fields'][$key]);
-        if($data['fields']['discount_type']==='fixed')$data['fields']['discount_value']=Money::input($data['fields']['discount_value']);
         // A deleted category must not prevent using an otherwise valid snapshot.
         if(!empty($data['fields']['category_id'])&&!Category::model()->exists('id=:id',array(':id'=>$data['fields']['category_id'])))$data['fields']['category_id']='';
         return array('id'=>(int)$template->id,'name'=>$template->name,'data'=>$data);
+    }
+    public static function editorData($id)
+    {
+        $result=self::data($id);$fields=&$result['data']['fields'];
+        foreach(array('price','compare_price') as $key)$fields[$key]=Money::input($fields[$key]);
+        if($fields['discount_type']==='fixed')$fields['discount_value']=Money::input($fields['discount_value']);
+        return $result;
     }
 }

@@ -1,13 +1,10 @@
 <?php $cs=Yii::app()->clientScript;$cs->registerCssFile(Yii::app()->baseUrl.'/assets/css/product-editor.css');$cs->registerScriptFile(Yii::app()->baseUrl.'/assets/js/product-editor.js',CClientScript::POS_END); ?>
-<div class="admin-page-head"><div><span class="eyebrow">کاتالوگ / فرم محصول</span><h1><?= $model->isNewRecord?'محصول جدید':'ویرایش محصول' ?></h1><p>محتوا، قیمت و رسانه‌های محصول را یکجا مدیریت کنید.</p></div><div class="product-header-actions"><?= CHtml::submitButton('ذخیره محصول',array('class'=>'btn btn-primary','form'=>'product-form')) ?><?= CHtml::link('بازگشت',array('adminProduct/index'),array('class'=>'btn btn-outline','data-pjax'=>'1')) ?></div></div>
+<div class="admin-page-head"><div><span class="eyebrow">کاتالوگ / فرم محصول</span><h1><?= $model->isNewRecord?'محصول جدید':'ویرایش محصول' ?></h1><p>محتوا، قیمت و رسانه‌های محصول را یکجا مدیریت کنید.</p></div><div class="product-header-actions"><?= CHtml::submitButton('ذخیره محصول',array('class'=>'btn btn-primary','form'=>'product-form')) ?><button type="button" class="btn btn-outline" data-open-product-templates>قالب محصول</button><?= CHtml::link('بازگشت',array('adminProduct/index'),array('class'=>'btn btn-outline','data-pjax'=>'1')) ?></div></div>
 <?php if($error): ?><div class="flash flash-error"><?= CHtml::encode($error) ?></div><?php endif; ?>
 <?php $form=$this->beginWidget('CActiveForm',array('id'=>'product-form')); ?><?= $form->errorSummary($model) ?><?= CHtml::hiddenField('stock_snapshot',$stockSnapshot) ?>
+<div class="flash flash-success" role="status" data-applied-product-template <?= $templateName?'':'hidden' ?>><?php if($templateName): ?>قالب «<?= CHtml::encode($templateName) ?>» اعمال شد؛ نام و SKU محصول جدید را وارد کنید.<?php endif; ?></div>
 <div class="admin-form-grid"><div class="form-main">
-<section class="panel product-template-panel" data-product-templates data-product-id="<?= (int)$model->id ?>">
-<div class="panel-heading"><h2>قالب‌های محصول</h2><button type="button" class="btn btn-outline btn-sm" data-save-product-template <?= $model->isNewRecord?'disabled':'' ?>>ساخت قالب از این محصول</button></div>
-<p class="muted note"><?= $model->isNewRecord?'برای ساخت قالب، ابتدا محصول را ذخیره کنید.':'ساخت قالب از آخرین اطلاعات ذخیره‌شدهٔ این محصول انجام می‌شود.' ?> قالب، قیمت‌ها، توضیحات، تگ‌ها، دسته‌بندی، مشخصات فنی و متادیتا را پر می‌کند؛ نام، SKU، آدرس، موجودی و تصاویر محصول حفظ می‌شوند.</p>
-<div class="product-template-actions"><div class="field"><label for="product-template">انتخاب قالب آماده</label><?= CHtml::dropDownList('product_template','',$templates,array('id'=>'product-template','prompt'=>'مثلاً 60x120 nano Polished','data-product-template'=>'1')) ?></div><button type="button" class="btn btn-outline" data-apply-product-template>اعمال قالب</button><button type="button" class="btn btn-outline btn-sm" data-delete-product-template>حذف قالب</button></div><p class="muted note" data-product-template-status role="status" aria-live="polite"></p>
-</section>
+
 <section class="panel"><h2>اطلاعات محصول</h2><div class="form-row product-identity-row">
 <div class="field"><label for="Product_title">نام محصول *</label><?= $form->textField($model,'title',array('maxlength'=>255,'required'=>true)) ?></div>
 <div class="field"><label for="Product_sku">شناسه کالا / SKU *</label><?= $form->textField($model,'sku',array('maxlength'=>120,'dir'=>'ltr','required'=>true)) ?></div>
@@ -27,4 +24,5 @@
 <section class="panel"><h2>تگ‌ها</h2><p class="muted note">با Enter، کاما، ویرگول فارسی یا / جدا کنید.</p><?= CHtml::textField('tags',$tagsText,array('class'=>'tag-input','placeholder'=>'افزودن تگ…')) ?></section>
 </aside></div>
 <?php $this->renderPartial('//admin/products/_variant',array('model'=>$model,'parentOptions'=>$parentOptions));$this->endWidget(); ?>
+<?php $this->renderPartial('//admin/products/_templates',array('model'=>$model,'templates'=>$templates)); ?>
 <?php if(!$model->isNewRecord): ?><div class="panel danger-zone"><?= CHtml::beginForm(array('adminProduct/delete','id'=>$model->id),'post',array('data-confirm'=>'محصول حذف شود؟ فایل‌های کتابخانه باقی می‌مانند.')) ?><?= CHtml::submitButton('حذف محصول',array('class'=>'btn btn-danger')) ?><?= CHtml::endForm() ?></div><?php endif; ?>

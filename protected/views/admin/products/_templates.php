@@ -1,0 +1,7 @@
+<dialog id="product-template-dialog" class="product-template-dialog" data-product-templates data-product-id="<?= (int)$model->id ?>" aria-labelledby="product-template-dialog-title">
+<div class="product-template-dialog-head"><h2 id="product-template-dialog-title">قالب‌های محصول</h2><button type="button" class="btn btn-outline btn-sm" data-close-product-templates aria-label="بستن قالب‌های محصول">×</button></div>
+<p class="muted note">قالب، قیمت‌ها، توضیحات، تگ‌ها، دسته‌بندی، مشخصات فنی و متادیتا را پر می‌کند؛ نام، SKU، آدرس، موجودی و تصاویر محصول حفظ می‌شوند.</p>
+<div class="product-template-actions"><div class="field"><label for="product-template">انتخاب قالب آماده</label><?= CHtml::dropDownList('product_template','',$templates,array('id'=>'product-template','prompt'=>'مثلاً 60x120 nano Polished','data-product-template'=>'1')) ?></div><button type="button" class="btn btn-primary" data-apply-product-template>اعمال قالب</button><button type="button" class="btn btn-outline btn-sm" data-delete-product-template>حذف قالب</button></div>
+<hr><h3>ساخت قالب از این محصول</h3><p class="muted note"><?= $model->isNewRecord?'برای ساخت قالب، ابتدا محصول را ذخیره کنید.':'قالب از آخرین اطلاعات ذخیره‌شدهٔ این محصول ساخته می‌شود؛ تغییرات ذخیره‌نشده در قالب قرار نمی‌گیرند.' ?></p><button type="button" class="btn btn-outline" data-save-product-template <?= $model->isNewRecord?'disabled':'' ?>>ساخت قالب از این محصول</button>
+<p class="muted note" data-product-template-status role="status" aria-live="polite"></p>
+</dialog>
