@@ -1,6 +1,5 @@
 <?php
 $cs=Yii::app()->clientScript;
-$adminLink=function($label,$route,$options=array()){return AccessService::canRoute($route[0])?CHtml::link($label,$route,$options):'';};
 JalaliDate::assets();
 $cs->registerCssFile(Yii::app()->baseUrl.'/assets/css/app.css');
 $cs->registerCssFile(Yii::app()->baseUrl.'/assets/css/modern.css');
@@ -24,24 +23,11 @@ $cs->registerScriptFile(Yii::app()->baseUrl.'/assets/js/pjax.js',CClientScript::
 <body class="admin-body" data-layout="admin" data-store-theme="admin" data-base="<?= CHtml::encode(Yii::app()->baseUrl) ?>"><?php $this->renderPartial('//shared/_dialogs'); ?><a class="skip-link" href="#pjax-main">رفتن به محتوا</a><div class="admin-shell">
 <aside class="sidebar">
   <div class="sidebar-head"><span class="brandmark">ب</span><div>پنل بازارچه<small>مدیریت فروشگاه</small></div></div>
-  <div class="side-section">داشبورد</div>
-  <?= $adminLink('◈ نمای کلی',array('adminDashboard/index'),array('data-pjax'=>'1')) ?>
-  <div class="side-section">کاتالوگ</div>
-  <?= $adminLink('▣ محصولات',array('adminProduct/index'),array('data-pjax'=>'1')) ?>
-  <?= $adminLink('◫ دسته‌بندی‌ها',array('adminCategory/index'),array('data-pjax'=>'1')) ?>
-  <?= $adminLink('⌗ تگ‌ها',array('adminTag/index'),array('data-pjax'=>'1')) ?>
-  <div class="side-section">محتوا و فروش</div>
-  <?= $adminLink('▥ کاتالوگ‌های شرکت',array('adminCatalog/index'),array('data-pjax'=>'1')) ?>
-  <?= $adminLink('▤ بلاگ',array('adminPost/index'),array('data-pjax'=>'1')) ?>
-  <?= $adminLink('◉ سفارش‌ها',array('adminOrder/index'),array('data-pjax'=>'1')) ?>
-  <?= $adminLink('◇ کدهای تخفیف',array('adminCoupon/index'),array('data-pjax'=>'1')) ?>
-  <?= $adminLink('↗ مالی و انبار',array('adminReport/index'),array('data-pjax'=>'1')) ?>
-  <div class="side-section">مدیریت وبسایت</div><?= $adminLink("◧ کالکشن‌ها",array("adminCollection/index"),array("data-pjax"=>"1")) ?><?= $adminLink("☷ مدیریت منو",array("adminMenu/index"),array("data-pjax"=>"1")) ?><?= $adminLink("▥ آمار بازدید",array("adminAnalytics/index"),array("data-pjax"=>"1")) ?>
-  <?= $adminLink('▧ کتابخانه رسانه',array('adminMedia/index'),array('data-pjax'=>'1')) ?>
-  <?= $adminLink('⚙ تنظیمات',array('adminSettings/index'),array('data-pjax'=>'1')) ?>
-  <?php if(AccessService::isSuperAdmin()): ?><?= $adminLink('◐ مدیریت قالب‌ها',array('adminTheme/index'),array('data-pjax'=>'1')) ?><?php endif; ?>
-  <?php if(AccessService::isSuperAdmin()): ?><?= $adminLink('تغییر آدرس صفحات',array('adminSeo/index'),array('data-pjax'=>'1')) ?><?= $adminLink('کاربران مدیریت',array('adminUser/index'),array('data-pjax'=>'1')) ?><?= $adminLink('عملیات و تاریخچه',array('adminOperations/index'),array('data-pjax'=>'1')) ?><?php endif; ?><?php if(AccessService::isSuperAdmin()): ?><?= $adminLink('دسترسی AI و API',array('adminApi/index'),array('data-no-pjax'=>'1')) ?><?php endif; ?><?= $adminLink('امنیت حساب',array('adminSecurity/index'),array('data-pjax'=>'1')) ?><div class="side-section">میانبرها</div>
-  <?= $adminLink('↗ مشاهده فروشگاه',array('site/index'),array('data-no-pjax'=>'1')) ?>
+  <?php foreach(AdminNavigation::groups() as $group): ?>
+  <div class="side-section"><?= CHtml::encode($group['title']) ?></div>
+  <?php foreach($group['items'] as $item): ?>
+  <?= CHtml::link(CHtml::encode($item['label']),$item['route'],$item['options']) ?>
+  <?php endforeach;endforeach; ?>
   <?= CHtml::beginForm(array('site/logout'),'post',array('class'=>'logout-form')) ?><?= CHtml::submitButton('خروج از حساب',array('class'=>'logout-btn')) ?><?= CHtml::endForm() ?>
 </aside>
 <div class="admin-area"><div class="admin-top"><div class="admin-breadcrumb">مدیریت / <?= CHtml::encode($this->pageTitle) ?></div><span class="admin-avatar">مدیر سیستم</span></div>
