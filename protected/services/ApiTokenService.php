@@ -21,10 +21,10 @@ class ApiTokenService
         foreach($scopes as $scope)if(!is_string($scope))throw new CHttpException(422,'مجوزها معتبر نیستند.');
         $user=User::model()->findByPk($userId);
         if(!$user||!$user->is_active||!is_string($name)||!trim($name)||mb_strlen($name)>100||!is_array($scopes)||!$scopes||array_diff($scopes,self::allowedScopes($user->role))||$days<1||$days>365)throw new CHttpException(422,'اطلاعات یا سطح دسترسی توکن معتبر نیست.');
-        $secret='bz_'.bin2hex(random_bytes(32));
+        $secret='bz_'.bin2hex(random_bytes(32));$expiresAt=date('Y-m-d H:i:s',time()+86400*$days);$scopes=array_values(array_unique($scopes));
         Yii::app()->db->createCommand()->insert('api_tokens',array('user_id'=>$userId,'name'=>trim($name),'token_hash'=>hash('sha256',$secret),
-            'scopes'=>CJSON::encode(array_values(array_unique($scopes))),'expires_at'=>date('Y-m-d H:i:s',time()+86400*$days),'created_at'=>date('Y-m-d H:i:s')));
-        return array('id'=>(int)Yii::app()->db->lastInsertID,'token'=>$secret);
+            'scopes'=>CJSON::encode($scopes),'expires_at'=>$expiresAt,'created_at'=>date('Y-m-d H:i:s')));
+        return array('id'=>(int)Yii::app()->db->lastInsertID,'token'=>$secret,'expires_at'=>$expiresAt,'scopes'=>$scopes,'name'=>trim($name));
     }
     public static function authenticate($authorization)
     {

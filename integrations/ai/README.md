@@ -6,7 +6,8 @@ The HTTP API is the source of truth. A dependency-free Node CLI and an MCP serve
 
 1. Run `php tools/upgrade.php`, then `npm ci`.
 2. As superadmin, open **دسترسی AI و API**. Enable the API and issue an expiring token with the scopes the client needs. Save the token when it is shown once. Tokens store only their SHA256 hashes in the database and can be revoked from this page.
-3. Set `BAZAARCHE_API_URL=https://your-site.example/api/v1/` and `BAZAARCHE_API_TOKEN` in the client's environment. Alternatively set `BAZAARCHE_TOKEN_FILE` to a private JSON file containing `url` and `token`. Do not put the token in a URL, repository, public directory or shell arguments.
+3. Immediately after issuance, the admin page shows a one-time setup guide with the new token, actual API URL, Jalali expiry and selected permissions. Enter the source folder on the AI client's computer to update the copyable `mcpServers` configuration. An alternative private-file configuration is included. The secret and generated setup are never shown on a later GET; save them privately before leaving.
+4. Set `BAZAARCHE_API_URL=https://your-site.example/api/v1/` and `BAZAARCHE_API_TOKEN` in the client's environment. Alternatively set `BAZAARCHE_TOKEN_FILE` to a private JSON file containing `url` and `token`. Do not put the token in a URL, repository, public directory or shell arguments.
 
 Local provisioning without printing a token:
 

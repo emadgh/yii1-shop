@@ -4,7 +4,7 @@ class AdminApiController extends AdminController
     public function actionIndex()
     {
         if(!AccessService::isSuperAdmin())throw new CHttpException(403);
-        header('Cache-Control: no-store');$secret=null;$error='';
+        header('Cache-Control: no-store');header('Referrer-Policy: no-referrer');$secret=null;$issued=null;$error='';
         if(Yii::app()->request->isPostRequest){
             try{
                 if(Yii::app()->request->getPost('action')==='toggle'){
@@ -15,7 +15,8 @@ class AdminApiController extends AdminController
                 $issued=ApiTokenService::issue(Yii::app()->user->id,Yii::app()->request->getPost('name',''),$scopes,(int)$days);$secret=$issued['token'];Audit::record('api_tokens',$issued['id'],'issue',array('scopes'=>$scopes));
             }catch(Exception $e){$error=$e->getMessage();}
         }
-        $this->pageTitle='دسترسی AI و API';$this->render('//admin/api/index',array('secret'=>$secret,'error'=>$error,'scopes'=>ApiTokenService::scopes()));
+        $apiUrl=rtrim(ShopSettings::get('public_url','')?:Yii::app()->request->hostInfo.Yii::app()->baseUrl,'/').'/api/v1/';
+        $this->pageTitle='دسترسی AI و API';$this->render('//admin/api/index',array('secret'=>$secret,'issued'=>$issued,'apiUrl'=>$apiUrl,'error'=>$error,'scopes'=>ApiTokenService::scopes()));
     }
     public function actionRevoke($id)
     {
