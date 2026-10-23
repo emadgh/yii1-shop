@@ -4,6 +4,7 @@ class MediaUploadService
 {
     public static function ingest($temporaryFile, $name, $scope='general', $accept='*', $context='')
     {
+        MediaContextService::requireSchema();
         if($context!=='')$context=MediaContextService::validate($context);
         if (!in_array($scope, array('general','catalogs'), true) || !is_string($accept)) throw new Exception('بخش آپلود معتبر نیست.');
         $size = filesize($temporaryFile);

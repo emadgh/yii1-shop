@@ -10,7 +10,7 @@ class MediaRepository
         }
         $command=Yii::app()->db->createCommand()->select('*')->from('media')->where('original_name LIKE :q',array(':q'=>'%'.mb_substr(trim($query),0,100).'%'));
         if($context!=='')$context=MediaContextService::validate($context);
-        if($scope==='context'){if($context==='')throw new CHttpException(400,'بخش رسانه را انتخاب کنید.');$command->andWhere('upload_context=:context',array(':context'=>$context));}
+        if($scope==='context'){MediaContextService::requireSchema();if($context==='')throw new CHttpException(400,'بخش رسانه را انتخاب کنید.');$command->andWhere('upload_context=:context',array(':context'=>$context));}
         if ($scope==='catalogs') $command->andWhere('upload_scope=:scope',array(':scope'=>'catalogs'));
         if (!in_array('*',$types,true)) {
             if (in_array('image/*',$types,true)) $types=array_merge(array_diff($types,array('image/*')),array('image/jpeg','image/png','image/webp'));

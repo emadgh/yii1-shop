@@ -2,6 +2,11 @@
 /** Upload provenance is independent of selecting existing shared media. */
 class MediaContextService
 {
+    public static function requireSchema()
+    {
+        $table=Yii::app()->db->schema->getTable('media',true);
+        if(!$table||!isset($table->columns['upload_context']))throw new CHttpException(503,'دیتابیس رسانه هنوز به‌روز نشده است. فایل tools/upgrade-cms.php نسخه جدید را آپلود کنید، سپس از مدیریت ← ارتقای دیتابیس، ارتقا را اجرا کنید و فایل را دوباره آپلود کنید.');
+    }
     private static function definition($type)
     {
         $types=array('product'=>array('Product','adminProduct'),'post'=>array('Post','adminPost'),'catalog'=>array('CompanyCatalog','adminCatalog'));
@@ -31,6 +36,7 @@ class MediaContextService
     public static function claim($context,$type,$id)
     {
         if($context===''||$context===null)return;
+        self::requireSchema();
         $context=self::validate($context);$target=$type.':'.(int)$id;
         if($context===$target)return;
         if(strpos($context,$type.':draft:')!==0)throw new CHttpException(422,'آپلودهای این فرم متعلق به محتوای دیگری هستند.');
